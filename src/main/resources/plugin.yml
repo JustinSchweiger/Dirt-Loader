@@ -1,0 +1,55 @@
+name: DirtLoader
+version: '${version}'
+main: net.dirtcraft.plugins.dirtloader.DirtLoader
+api-version: 1.16
+authors: [ dejustinhd ]
+description: Adds DirtCraft Chunkloaders to 1.16.5+
+commands:
+    dl:
+        description: Main command for DirtLoader
+        aliases: [ dirtloader, bcl ]
+
+permissions:
+    dirtloader.common:
+        description: Common permission for players to use DirtLoader
+        children:
+            dirtloader.list: true
+            dirtloader.bal: true
+            dirtloader.load: true
+            dirtloader.unload: true
+    dirtloader.advanced:
+        description: Advanced permission for players to use DirtLoader
+        children:
+            dirtloader.list.user: true
+            dirtloader.bal.user: true
+            dirtloader.load: true
+            dirtloader.unload.other: true
+            dirtloader.info: true
+            dirtloader.teleport: true
+            dirtloader.common: true
+    dirtloader.admin:
+        description: Admin permission for players to use DirtLoader
+        children:
+            dirtloader.chunks: true
+            dirtloader.reload: true
+            dirtloader.advanced: true
+    dirtloader.list:
+        description: Permission to list own chunkloaders
+    dirtloader.list.user:
+        description: Permission to list other players chunkloaders
+    dirtloader.bal:
+        description: Permission to see own chunkloader balance
+    dirtloader.bal.user:
+        description: Permission to see other players chunkloader balance
+    dirtloader.chunks:
+        description: Permission to add and remove chunks to and from a player
+    dirtloader.reload:
+        description: Permission to reload the configs
+    dirtloader.info:
+        description: Permission to see info about the current chunk
+    dirtloader.load:
+        description: Permission to use the base functionality
+    dirtloader.unload:
+        description: Permission to unload own chunks
+    dirtloader.unload.other:
+        description: Permission to unload other players chunks
