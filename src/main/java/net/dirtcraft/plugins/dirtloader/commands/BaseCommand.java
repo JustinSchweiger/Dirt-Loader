@@ -1,9 +1,6 @@
 package net.dirtcraft.plugins.dirtloader.commands;
 
-import net.dirtcraft.plugins.dirtloader.DirtLoader;
-import net.dirtcraft.plugins.dirtloader.Permissions;
-import net.dirtcraft.plugins.dirtloader.Strings;
-import net.dirtcraft.plugins.dirtloader.Utilities;
+import net.dirtcraft.plugins.dirtloader.*;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -68,7 +65,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			int chunkX = currentChunk.getX();
 			int chunkZ = currentChunk.getZ();
 			String world = currentChunk.getWorld().getName();
-			Utilities.saveChunkToPlayer(player, world, chunkX, chunkZ, type);
+			ChunkManager.saveChunkToPlayer(player, world, chunkX, chunkZ, type);
 			return true;
 		} else if (args[0].equalsIgnoreCase("chunks") && sender.hasPermission(Permissions.CHUNKS)) {
 			if (args.length != 5) {
@@ -94,9 +91,9 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			int amount = Integer.parseInt(args[4]);
 
 			if (action.equalsIgnoreCase("add")) {
-				Utilities.addChunksToPlayer(player, type, amount, sender);
+				ChunkManager.addChunksToPlayer(player, type, amount, sender);
 			} else {
-				Utilities.removeChunksFromPlayer(player, type, amount, sender);
+				ChunkManager.removeChunksFromPlayer(player, type, amount, sender);
 			}
 
 			return true;
@@ -190,7 +187,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		} else if (args[0].equalsIgnoreCase("unload") && (sender.hasPermission(Permissions.UNLOAD) || sender.hasPermission(Permissions.UNLOAD_OTHER))) {
 			if (args.length != 3) {
 				if (Utilities.config.getBoolean("debug-messages")) {
-					DirtLoader.getPlugin().getLogger().log(Level.SEVERE, "Invalid arguments for unload: " + Arrays.toString(args));
+					DirtLoader.plugin.getLogger().log(Level.SEVERE, "Invalid arguments for unload: " + Arrays.toString(args));
 				}
 				return false;
 			}
@@ -207,11 +204,11 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 					return false;
 				}
 
-				Utilities.unloadChunkOfPlayer(sender, player, args[2]);
+				ChunkManager.unloadChunkOfPlayer(sender, player, args[2]);
 				return true;
 			}
 
-			Utilities.unloadChunkOfPlayer(sender, player, args[2]);
+			ChunkManager.unloadChunkOfPlayer(sender, player, args[2]);
 			return true;
 		} else if (args[0].equalsIgnoreCase("reload")) {
 			if (!sender.hasPermission(Permissions.RELOAD)) {
@@ -320,7 +317,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 	}
 
 	private void showInfo(CommandSender sender, String chunkString) {
-		File folder = new File(DirtLoader.getPlugin().getDataFolder() + "/playerdata/");
+		File folder = new File(DirtLoader.plugin.getDataFolder() + "/playerdata/");
 		File[] fileList = folder.listFiles();
 		HashMap<String, String> loadersFound = new HashMap<>();
 
