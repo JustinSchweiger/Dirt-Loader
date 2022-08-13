@@ -1,0 +1,47 @@
+# Configuration file for Dirt-Loader
+
+[general]
+# Wether debug-messages should be printed to the console
+debug = true
+# Wether debug-messages should be colored in the console
+coloredDebug = true
+# The amount of online loaders new players get.
+onlineLoaderAmount = 5
+# The amount of offline loaders new players get.
+offlineLoaderAmount = 5
+# The command that will be used for teleportation.
+# This command will be run by the player so they need to have permission to use it.
+teleportCommand = "/minecraft:tp"
+# How often should the server perform a check for overdue offline chunkloaders.
+# This value is in minutes.
+offlineLoaderCheckInterval = 5
+# The amount of list entries that should be shown in the list and info command.
+# Keep in mind that there are atleast 2 more lines, for the top and bottom bar, than this value.
+listEntries = 5
+
+[sound]
+# Wether a sound should be played when a player loads a new chunk successfully.
+playSuccessSound = true
+# The sound that should be played when a player loads a new chunk successfully.
+# For this to do something the value above needs to be true.
+successSound = "minecraft:entity.experience_orb.pickup"
+# Wether a sound should be played when a chunk can't be loaded.
+# This can have multiple reasons, for example the chunk is already loaded.
+# This also plays when the player requests their list but they dont have any chunkloaders setup yet.
+playErrorSound = true
+# The sound that should be played when a chunk can't be loaded.
+# For this to do something the value above needs to be true.
+errorSound = "minecraft:entity.creeper.death"
+# Wether a sound should be played when a player unloads a chunk.
+playUnloadSound = true
+# The sound that should be played when a player unloads a chunk.
+# For this to do something the value above needs to be true.
+unloadSound = "minecraft:block.beacon.deactivate"
+
+[offlineLoader]
+# Wether the offline loader should be enabled.
+enabled = true
+# How long do the offline loaders work after the player disconnects.
+# This value is in hours.
+# Values smaller than 1 are bugged.
+offlineLoaderDuration = 6

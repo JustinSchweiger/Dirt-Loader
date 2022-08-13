@@ -1,37 +1,26 @@
 package net.dirtcraft.plugins.dirtloader.commands;
 
-import net.dirtcraft.plugins.dirtloader.*;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
+import net.dirtcraft.plugins.dirtloader.utils.Permissions;
+import net.dirtcraft.plugins.dirtloader.utils.Strings;
+import net.dirtcraft.plugins.dirtloader.utils.Utilities;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import java.io.File;
 import java.util.*;
-import java.util.logging.Level;
 
 public class BaseCommand implements CommandExecutor, TabCompleter {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (!sender.hasPermission(Permissions.LOAD)) {
+		if (!sender.hasPermission(Permissions.BASE)) {
 			sender.sendMessage(Strings.NO_PERMISSION);
-			return false;
-		}
-
-		if (sender instanceof Player) {
-			Utilities.generatePlayerFile((Player) sender);
+			return true;
 		}
 
 		if (args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("help"))) {
@@ -42,184 +31,31 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			}
 			sender.sendMessage(Strings.BAR_TOP + message + Strings.BAR_BOTTOM);
 			return true;
-		} else if (args[0].equalsIgnoreCase("load")) {
-			if (!(sender instanceof Player)) {
-				sender.sendMessage(Strings.NO_CONSOLE);
-				return false;
-			}
+		}
 
-			if (args.length != 2) {
-				sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl load <online/offline>");
-				return false;
-			}
+		String arg = args[0].toLowerCase();
 
-			if (!(args[1].equalsIgnoreCase("online") || args[1].equalsIgnoreCase("offline"))) {
-				sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl load <online/offline>");
-				return false;
-			}
+		switch (arg) {
+			case "list":
+				return ListCommand.run(sender, args);
+			case "bal":
+				return BalCommand.run(sender, args);
+			case "chunks":
+				return ChunksCommand.run(sender, args);
+			case "reload":
+				return ReloadCommand.run(sender, args);
+			case "info":
+				return InfoCommand.run(sender, args);
+			case "load":
+				return LoadCommand.run(sender, args);
+			case "unload":
+				return UnloadCommand.run(sender, args);
+			default:
+				sender.sendMessage(Strings.UNKNOWN_COMMAND + " " + ChatColor.DARK_RED + arg);
+		}
 
-			String type = args[1];
-			Player player = (Player) sender;
 
-			Chunk currentChunk = player.getLocation().getChunk();
-			int chunkX = currentChunk.getX();
-			int chunkZ = currentChunk.getZ();
-			String world = currentChunk.getWorld().getName();
-			ChunkManager.saveChunkToPlayer(player, world, chunkX, chunkZ, type);
-			return true;
-		} else if (args[0].equalsIgnoreCase("chunks") && sender.hasPermission(Permissions.CHUNKS)) {
-			if (args.length != 5) {
-				sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl chunks <add/remove> <user> <type> <amount>");
-				return false;
-			}
-
-			Player player = Bukkit.getPlayer(args[2]);
-			boolean isOnlinePlayer = player != null;
-
-			if (!((args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("remove")) && (args[3].equalsIgnoreCase("online") || args[3].equalsIgnoreCase("offline")) || !StringUtils.isNumeric(args[4]))) {
-				sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl chunks <add/remove> <user> <type> <amount>");
-				return false;
-			}
-
-			if (!isOnlinePlayer) {
-				sender.sendMessage(Strings.PLAYER_NOT_FOUND);
-				return false;
-			}
-
-			String action = args[1];
-			String type = args[3];
-			int amount = Integer.parseInt(args[4]);
-
-			if (action.equalsIgnoreCase("add")) {
-				ChunkManager.addChunksToPlayer(player, type, amount, sender);
-			} else {
-				ChunkManager.removeChunksFromPlayer(player, type, amount, sender);
-			}
-
-			return true;
-		} else if (args[0].equalsIgnoreCase("bal") && (sender.hasPermission(Permissions.BAL) || sender.hasPermission(Permissions.BAL_USER))) {
-			if (sender instanceof Player) {
-				if (sender.hasPermission(Permissions.BAL) && !sender.hasPermission(Permissions.BAL_USER)) {
-					showBal(sender, (Player) sender);
-					return true;
-				} else if (sender.hasPermission(Permissions.BAL_USER)) {
-					Player player = null;
-					if (args.length == 2) {
-						player = Bukkit.getPlayer(args[1]);
-					}
-
-					if (player == null) {
-						player = (Player) sender;
-					}
-
-					showBal(sender, player);
-					return true;
-				}
-			} else {
-				if (args.length != 2) {
-					sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl bal <user>");
-					return false;
-				}
-
-				Player player = Bukkit.getPlayer(args[1]);
-				if (player == null) {
-					sender.sendMessage(Strings.PLAYER_NOT_FOUND);
-					return false;
-				}
-				showBal(sender, player);
-				return true;
-			}
-		} else if (args[0].equalsIgnoreCase("list") && (sender.hasPermission(Permissions.LIST) || sender.hasPermission(Permissions.LIST_USER))) {
-			if (!(sender instanceof Player)) {
-				sender.sendMessage(Strings.NO_CONSOLE);
-				return false;
-			}
-
-			if (sender.hasPermission(Permissions.LIST) && !sender.hasPermission(Permissions.LIST_USER)) {
-				if (args.length == 2) {
-					if (StringUtils.isNumeric(args[1])) {
-						int page = Integer.parseInt(args[1]);
-						showList(sender, (Player) sender, page);
-						return true;
-					} else {
-						sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl list [page]");
-						return false;
-					}
-				} else if (args.length == 1) {
-					showList(sender, (Player) sender, 1);
-					return true;
-				} else {
-					sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl list [page]");
-					return false;
-				}
-			} else if (sender.hasPermission(Permissions.LIST_USER)) {
-				if (args.length == 1) {
-					showList(sender, (Player) sender, 1);
-					return true;
-				} else if (args.length == 2) {
-					Player player = Bukkit.getPlayer(args[1]);
-					if (StringUtils.isNumeric(args[1])) {
-						int page = Integer.parseInt(args[1]);
-						showList(sender, (Player) sender, page);
-						return true;
-					} else if (player != null) {
-						showList(sender, player, 1);
-						return true;
-					} else {
-						sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl list [user] [page]");
-						return false;
-					}
-				} else if (args.length == 3) {
-					Player player = Bukkit.getPlayer(args[1]);
-					if (StringUtils.isNumeric(args[2]) && player != null) {
-						int page = Integer.parseInt(args[2]);
-						showList(sender, player, page);
-						return true;
-					} else {
-						sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl list [user] [page]");
-						return false;
-					}
-				} else {
-					sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl list [user] [page]");
-					return false;
-				}
-			}
-		} else if (args[0].equalsIgnoreCase("unload") && (sender.hasPermission(Permissions.UNLOAD) || sender.hasPermission(Permissions.UNLOAD_OTHER))) {
-			if (args.length != 3) {
-				if (Utilities.config.getBoolean("debug-messages")) {
-					DirtLoader.plugin.getLogger().log(Level.SEVERE, "Invalid arguments for unload: " + Arrays.toString(args));
-				}
-				return false;
-			}
-
-			Player player = Bukkit.getPlayer(args[1]);
-			if (player == null) {
-				sender.sendMessage(Strings.PLAYER_NOT_FOUND);
-				return false;
-			}
-
-			if (sender.hasPermission(Permissions.UNLOAD) && !sender.hasPermission(Permissions.UNLOAD_OTHER)) {
-				if (!player.getName().equals(sender.getName())) {
-					sender.sendMessage(Strings.NO_UNLOAD_OTHER_PERMS);
-					return false;
-				}
-
-				ChunkManager.unloadChunkOfPlayer(sender, player, args[2]);
-				return true;
-			}
-
-			ChunkManager.unloadChunkOfPlayer(sender, player, args[2]);
-			return true;
-		} else if (args[0].equalsIgnoreCase("reload")) {
-			if (!sender.hasPermission(Permissions.RELOAD)) {
-				sender.sendMessage(Strings.NO_PERMISSION);
-				return false;
-			}
-
-			Utilities.reloadConfigFile();
-			sender.sendMessage(Strings.CONFIG_RELOADED);
-			return true;
-		} else if (args[0].equalsIgnoreCase("info") && sender.hasPermission(Permissions.INFO)) {
+		if (args[0].equalsIgnoreCase("info") && sender.hasPermission(Permissions.INFO)) {
 			if (args.length != 1) {
 				sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl info");
 				return false;
@@ -243,29 +79,8 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		return false;
 	}
 
-	private void showBal(CommandSender sender, Player player) {
-		sender.sendMessage(Strings.BAR_TOP + ChatColor.GREEN + player.getName() + ChatColor.GRAY + "'s Balance:\n" + " " + ChatColor.DARK_AQUA + "\nOnline: " + ChatColor.GRAY + Utilities.getPlayerFile(player).getInt("used.online") + ChatColor.GOLD + " / " + ChatColor.GRAY + Utilities.getPlayerFile(player).getInt("available.online") + "\n");
-		sender.sendMessage(ChatColor.DARK_AQUA + "Offline: " + ChatColor.GRAY + Utilities.getPlayerFile(player).getInt("used.offline") + ChatColor.GOLD + " / " + ChatColor.GRAY + Utilities.getPlayerFile(player).getInt("available.offline") + "\n" + Strings.BAR_BOTTOM);
-	}
-
 	private void showList(CommandSender sender, Player player, int page) {
-		int totalUsed = Utilities.getPlayerFile(player).getInt("used.online") + Utilities.getPlayerFile(player).getInt("used.offline");
-		if (totalUsed == 0) {
-			sender.sendMessage(Strings.NO_CHUNKS_LOADED);
-			return;
-		}
-
-		int maxPages = (int) Math.ceil((double) Utilities.getPlayerFile(player).getStringList("chunks").size() / (double) Utilities.config.getInt("general.max-list-entries-per-page"));
-		if (page > maxPages) {
-			sender.sendMessage(Strings.PAGE_INDEX_OUT_OF_BOUNDS + " Index must be smaller or equal to: " + maxPages);
-			return;
-		}
-
-		int start = (page - 1) * Utilities.config.getInt("general.max-list-entries-per-page");
-		int end = page * Utilities.config.getInt("general.max-list-entries-per-page");
-		if (end > Utilities.getPlayerFile(player).getStringList("chunks").size()) {
-			end = Utilities.getPlayerFile(player).getStringList("chunks").size();
-		}
+		/*
 		sender.sendMessage(Strings.BAR_TOP);
 		sender.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.GRAY + "'s Chunks (" + ChatColor.DARK_AQUA + page + ChatColor.GRAY + "/" + ChatColor.DARK_AQUA + maxPages + ChatColor.GRAY + "):");
 
@@ -313,12 +128,11 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 				sender.spigot().sendMessage(entry);
 			}
 		}
-		sender.sendMessage(Strings.BAR_BOTTOM);
+		sender.sendMessage(Strings.BAR_BOTTOM);*/
 	}
 
 	private void showInfo(CommandSender sender, String chunkString) {
-		File folder = new File(DirtLoader.plugin.getDataFolder() + "/playerdata/");
-		File[] fileList = folder.listFiles();
+		/*File[] fileList = Utilities.getAllPlayerdataFiles();
 		HashMap<String, String> loadersFound = new HashMap<>();
 
 		if (fileList == null) {
@@ -373,24 +187,24 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			}
 
 			sender.sendMessage(Strings.BAR_BOTTOM);
-		}
+		}*/
 	}
 
 	private ArrayList<String> getListings(CommandSender sender) {
 		ArrayList<String> listings = new ArrayList<>();
-		if (sender.hasPermission(Permissions.LIST_USER)) {
+		if (sender.hasPermission(Permissions.LIST_OTHER)) {
 			listings.add(Strings.HELP_LIST_USER);
 		}
 
-		if (sender.hasPermission(Permissions.LIST) && !sender.hasPermission(Permissions.LIST_USER)) {
+		if (sender.hasPermission(Permissions.LIST) && !sender.hasPermission(Permissions.LIST_OTHER)) {
 			listings.add(Strings.HELP_LIST);
 		}
 
-		if (sender.hasPermission(Permissions.BAL_USER)) {
+		if (sender.hasPermission(Permissions.BAL_OTHER)) {
 			listings.add(Strings.HELP_BAL_USER);
 		}
 
-		if (sender.hasPermission(Permissions.BAL) && !sender.hasPermission(Permissions.BAL_USER)) {
+		if (sender.hasPermission(Permissions.BAL) && !sender.hasPermission(Permissions.BAL_OTHER)) {
 			listings.add(Strings.HELP_BAL);
 		}
 
@@ -407,7 +221,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		}
 
 		if (sender.hasPermission(Permissions.LOAD)) {
-			listings.add(Strings.LOAD);
+			listings.add(Strings.HELP_LOAD);
 		}
 
 		return listings;
@@ -418,7 +232,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		List<String> arguments = new ArrayList<>();
 
 		if (args.length == 1) {
-			if (sender.hasPermission(Permissions.LIST_USER)) {
+			if (sender.hasPermission(Permissions.LIST_OTHER)) {
 				arguments.add("list");
 			}
 
@@ -426,7 +240,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 				arguments.add("help");
 			}
 
-			if (sender.hasPermission(Permissions.BAL_USER) || sender.hasPermission(Permissions.BAL)) {
+			if (sender.hasPermission(Permissions.BAL_OTHER) || sender.hasPermission(Permissions.BAL)) {
 				arguments.add("bal");
 			}
 
@@ -445,11 +259,11 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			if (sender.hasPermission(Permissions.LOAD)) {
 				arguments.add("load");
 			}
-		} else if (args.length == 2 && args[0].equalsIgnoreCase("list") && sender.hasPermission(Permissions.LIST_USER)) {
+		} else if (args.length == 2 && args[0].equalsIgnoreCase("list") && sender.hasPermission(Permissions.LIST_OTHER)) {
 			for (Player player : sender.getServer().getOnlinePlayers()) {
 				arguments.add(player.getName());
 			}
-		} else if (args.length == 2 && args[0].equalsIgnoreCase("bal") && sender.hasPermission(Permissions.BAL_USER)) {
+		} else if (args.length == 2 && args[0].equalsIgnoreCase("bal") && sender.hasPermission(Permissions.BAL_OTHER)) {
 			for (Player player : sender.getServer().getOnlinePlayers()) {
 				arguments.add(player.getName());
 			}
