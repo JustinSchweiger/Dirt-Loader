@@ -39,10 +39,6 @@ public class DatabaseOperation {
 				}
 
 				if (!playerResult.next()) {
-					if (Utilities.config.general.debug) {
-						Utilities.log(Level.WARNING, "No results found for " + value);
-					}
-
 					Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> callback.onPlayerNotFound(value));
 					return;
 				}
@@ -272,10 +268,8 @@ public class DatabaseOperation {
 				deleteLoader.executeUpdate();
 
 				if (type.equalsIgnoreCase("online")) {
-					System.out.println("- online chunk");
 					updatePlayerOnline.executeUpdate();
 				} else {
-					System.out.println("- offline chunk");
 					updatePlayerOffline.executeUpdate();
 				}
 
@@ -352,9 +346,26 @@ public class DatabaseOperation {
 					return;
 				}
 
-				System.out.println(chunkloaders.size());
-
 				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> infoCallback.onChunkloaderFound(chunkloaders));
+			} catch (SQLException e) {
+				if (Utilities.config.general.debug) {
+					Utilities.log(Level.SEVERE, "Could not execute query!");
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public static void updatePlayerShutdownTime(final UUID uniqueId, final ShutdownTimeCallback shutdownTimeCallback) {
+		Bukkit.getScheduler().runTaskAsynchronously(DirtLoader.getPlugin(), () -> {
+			try (Connection connection = Database.getConnection();
+			     PreparedStatement statement = connection.prepareStatement("UPDATE PLAYER SET PLAYER_SHUTDOWNTIME = ? WHERE PLAYER_UUID = ?")
+			) {
+				LocalDateTime shutdownTime = LocalDateTime.now().plusHours(Utilities.config.offlineLoader.offlineLoaderDuration);
+				statement.setString(1, shutdownTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+				statement.setString(2, uniqueId.toString());
+				statement.executeUpdate();
+				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> shutdownTimeCallback.onSuccess(shutdownTime));
 			} catch (SQLException e) {
 				if (Utilities.config.general.debug) {
 					Utilities.log(Level.SEVERE, "Could not execute query!");

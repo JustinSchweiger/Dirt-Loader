@@ -1,5 +1,7 @@
 package net.dirtcraft.plugins.dirtloader.commands;
 
+import net.dirtcraft.plugins.dirtloader.data.ChunkLoader;
+import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.utils.Permissions;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
 import org.bukkit.ChatColor;
@@ -30,6 +32,12 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		}
 
 		String arg = args[0].toLowerCase();
+		HashMap<UUID, List<ChunkLoader>> chunkloaders = ChunkManager.getLoadedChunks();
+		for (Map.Entry<UUID, List<ChunkLoader>> chunkloader : chunkloaders.entrySet()) {
+			for (ChunkLoader loader : chunkloader.getValue()) {
+				System.out.println("UUID: " + loader.getOwnerUuid() + "\t\t\t" + loader.getChunk().getX() + " | " + loader.getChunk().getZ());
+			}
+		}
 
 		switch (arg) {
 			case "list":
@@ -51,6 +59,8 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			default:
 				sender.sendMessage(Strings.UNKNOWN_COMMAND + " " + ChatColor.DARK_RED + arg);
 		}
+
+
 
 		return true;
 	}

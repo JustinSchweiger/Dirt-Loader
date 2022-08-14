@@ -2,24 +2,27 @@ package net.dirtcraft.plugins.dirtloader.data;
 
 import net.dirtcraft.plugins.dirtloader.DirtLoader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ChunkManager {
 	private static HashMap<UUID, List<ChunkLoader>> loadedChunks;
 
 	public static void init() {
-		loadedChunks = new HashMap<UUID, List<ChunkLoader>>();
+		loadedChunks = new HashMap<>();
 	}
 
-	/**
-	 * Get the map of all loaded chunks.
-	 * @return
-	 */
 	public static HashMap<UUID, List<ChunkLoader>> getLoadedChunks() {
 		return loadedChunks;
+	}
+
+	public static List<ChunkLoader> getAllOtherLoadedChunkloaders(UUID uuid) {
+		List<ChunkLoader> allLoadedChunks = new ArrayList<>();
+		for (Map.Entry<UUID, List<ChunkLoader>> chunkLoaders : loadedChunks.entrySet()) {
+			if (!chunkLoaders.getKey().equals(uuid)) {
+				allLoadedChunks.addAll(chunkLoaders.getValue());
+			}
+		}
+		return allLoadedChunks;
 	}
 
 	/**
@@ -28,15 +31,15 @@ public class ChunkManager {
 	 * @param chunkLoader The chunkloader to add.
 	 */
 	public static void addChunk(UUID uuid, ChunkLoader chunkLoader) {
+		if (!isChunkLoaded(chunkLoader.getChunk())) {
+			loadChunk(chunkLoader.getChunk());
+			System.out.println("Loading chunk " + chunkLoader.getChunk().getX() + " " + chunkLoader.getChunk().getZ());
+		}
+
 		if (!loadedChunks.containsKey(uuid)) {
 			loadedChunks.put(uuid, new ArrayList<>());
 		}
 		loadedChunks.get(uuid).add(chunkLoader);
-
-		if (!isChunkLoaded(chunkLoader.getChunk())) {
-			//loadChunk(chunkLoader.getChunk());
-			System.out.println("Loading chunk " + chunkLoader.getChunk().getX() + " " + chunkLoader.getChunk().getZ());
-		}
 	}
 
 	/**
@@ -48,6 +51,9 @@ public class ChunkManager {
 		if (loadedChunks.containsKey(uuid)) {
 			loadedChunks.get(uuid).remove(chunkLoader);
 		}
+
+		unloadChunk(chunkLoader.getChunk());
+		System.out.println("Unloading chunk " + chunkLoader.getChunk().getX() + " " + chunkLoader.getChunk().getZ());
 	}
 
 	/**
@@ -81,6 +87,18 @@ public class ChunkManager {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Gets a list of all loaded chunks of a specific player.
+	 * @param uuid The UUID of the player.
+	 * @return A list of all loaded chunks of the player.
+	 */
+	public static List<ChunkLoader> getChunkloadersOfPlayer(UUID uuid) {
+		if (loadedChunks.containsKey(uuid)) {
+			return loadedChunks.get(uuid);
+		}
+		return new ArrayList<>();
 	}
 
 	private static void loadChunk(Chunk chunk) {

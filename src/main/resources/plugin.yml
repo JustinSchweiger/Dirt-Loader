@@ -13,6 +13,7 @@ permissions:
     dirtloader.common:
         description: Common permission for players to use DirtLoader
         children:
+            dirtloader.base: true
             dirtloader.list: true
             dirtloader.bal: true
             dirtloader.load: true
@@ -21,19 +22,25 @@ permissions:
     dirtloader.advanced:
         description: Advanced permission for players to use DirtLoader
         children:
+            dirtloader.base: true
             dirtloader.list.user: true
             dirtloader.bal.user: true
             dirtloader.load: true
             dirtloader.unload.other: true
             dirtloader.info: true
             dirtloader.teleport: true
-            dirtloader.common: true
     dirtloader.admin:
         description: Admin permission for players to use DirtLoader
         children:
+            dirtloader.base: true
+            dirtloader.list.user: true
+            dirtloader.bal.user: true
+            dirtloader.load: true
+            dirtloader.unload.other: true
+            dirtloader.info: true
+            dirtloader.teleport: true
             dirtloader.chunks: true
             dirtloader.reload: true
-            dirtloader.advanced: true
     dirtloader.list:
         description: Permission to list own chunkloaders
     dirtloader.list.user:
