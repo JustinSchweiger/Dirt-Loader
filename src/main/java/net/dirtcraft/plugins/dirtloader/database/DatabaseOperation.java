@@ -59,9 +59,9 @@ public class DatabaseOperation {
 					LocalDateTime creationTime = LocalDateTime.parse(chunkloaderResult.getString("loader_creationtime"), DateTimeFormatter.ISO_DATE_TIME);
 					chunkloadersFound.add(new ChunkLoader(
 							UUID.fromString(chunkloaderResult.getString("loader_uuid")),
-							UUID.fromString(chunkloaderResult.getString("player_uuid")),
+							UUID.fromString(chunkloaderResult.getString("player_owneruuid")),
 							new Chunk(
-									DirtLoader.getPlugin().getServer().getWorld(chunkloaderResult.getString("loader_world")),
+									chunkloaderResult.getString("loader_world"),
 									chunkloaderResult.getInt("loader_x"),
 									chunkloaderResult.getInt("loader_z")
 							),
@@ -81,11 +81,7 @@ public class DatabaseOperation {
 						chunkloadersFound
 				);
 
-				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> {
-					try {
-						callback.onPlayerFound(player);
-					} catch (SQLException ignored) {}
-				});
+				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> callback.onPlayerFound(player));
 			} catch (SQLException e) {
 				if (Utilities.config.general.debug) {
 					Utilities.log(Level.SEVERE, "Could not execute query!");
@@ -109,9 +105,7 @@ public class DatabaseOperation {
 				statement.setString(7, player.getShutdownTime().format(DateTimeFormatter.ISO_DATE_TIME));
 
 				statement.executeUpdate();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+			} catch (SQLException ignored) {}
 		});
 	}
 
@@ -220,7 +214,7 @@ public class DatabaseOperation {
 				insertLoader.setString(1, chunkloader.getUuid().toString());
 				insertLoader.setString(2, ownerUuid.toString());
 				insertLoader.setString(3, type);
-				insertLoader.setString(4, chunkloader.getChunk().getWorld().getName());
+				insertLoader.setString(4, chunkloader.getChunk().getWorld());
 				insertLoader.setInt(5, chunkloader.getChunk().getX());
 				insertLoader.setInt(6, chunkloader.getChunk().getZ());
 				insertLoader.setString(7, chunkloader.getCreationTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -261,7 +255,7 @@ public class DatabaseOperation {
 				}
 
 				Chunk chunk = new Chunk(
-						DirtLoader.getPlugin().getServer().getWorld(resultSet.getString("LOADER_WORLD")),
+						resultSet.getString("LOADER_WORLD"),
 						resultSet.getInt("LOADER_X"),
 						resultSet.getInt("LOADER_Z")
 				);
@@ -274,7 +268,7 @@ public class DatabaseOperation {
 						creationTime
 				);
 
-				String type = resultSet.getString("LOADER_TYPE");
+				String type = resultSet.getString("LOADER_TYPE").trim();
 
 				deleteLoader.setString(1, chunkloaderUuid.toString());
 				updatePlayerOnline.setString(1, playerUuid.toString());
@@ -283,8 +277,10 @@ public class DatabaseOperation {
 				deleteLoader.executeUpdate();
 
 				if (type.equalsIgnoreCase("online")) {
+					System.out.println("- online chunk");
 					updatePlayerOnline.executeUpdate();
 				} else {
+					System.out.println("- offline chunk");
 					updatePlayerOffline.executeUpdate();
 				}
 

@@ -41,6 +41,7 @@ public class Strings {
 	public static final String NO_CHUNKS_LOADED = PREFIX + ChatColor.RED + "No chunks loaded yet!\nUse " + ChatColor.GOLD + "/dl load <online/offline>" + ChatColor.RED + " to load chunks.";
 	public static final String CLICK_TO_UNLOAD = ChatColor.UNDERLINE + "" + ChatColor.DARK_PURPLE + "Click me to unload this chunk!";
 	public static final String CLICK_TO_TELEPORT = ChatColor.UNDERLINE + "" + ChatColor.DARK_PURPLE + "Click me to teleport to this chunk!";
+	public static final String HALF_BAR_BOTTOM = ChatColor.DARK_RED + "--------------------";
 
 	// ------------------------------------------------------ RELOAD COMMAND ------------------------------------------------------
 	public static final String CONFIG_RELOADED = PREFIX + ChatColor.GREEN + "Config reloaded!";

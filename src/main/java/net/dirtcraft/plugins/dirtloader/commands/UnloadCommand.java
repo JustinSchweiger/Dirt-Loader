@@ -50,7 +50,7 @@ public class UnloadCommand {
 	private static void unloadChunk(final CommandSender sender, final UUID playerUuid, final UUID chunkloaderUuid) {
 		DatabaseOperation.removeChunkloaderFromPlayer(playerUuid, chunkloaderUuid, chunkLoader -> {
 			ChunkManager.removeChunk(playerUuid, chunkLoader);
-			sender.sendMessage(Strings.CHUNK_UNLOADED.replace("{X}", Integer.toString(chunkLoader.getChunk().getX())).replace("{Z}", Integer.toString(chunkLoader.getChunk().getZ())).replace("{TYPE}", chunkLoader.getType()));
+			sender.sendMessage(Strings.CHUNK_UNLOADED.replace("{X}", Integer.toString(chunkLoader.getChunk().getX())).replace("{Z}", Integer.toString(chunkLoader.getChunk().getZ())).replace("{type}", chunkLoader.getType().trim()));
 			Utilities.playUnloadSound(sender);
 		});
 	}

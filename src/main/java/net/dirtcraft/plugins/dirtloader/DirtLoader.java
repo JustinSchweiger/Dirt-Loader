@@ -21,4 +21,9 @@ public final class DirtLoader extends JavaPlugin {
 		Utilities.registerListener();
 		Utilities.registerCommands();
 	}
+
+	@Override
+	public void onDisable() {
+		Database.closeDatabase();
+	}
 }

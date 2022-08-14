@@ -58,7 +58,7 @@ public class ChunkManager {
 	public static boolean isChunkLoaded(Chunk chunk) {
 		for (List<ChunkLoader> chunkLoaders : loadedChunks.values()) {
 			for (ChunkLoader chunkLoader : chunkLoaders) {
-				if (chunkLoader.getChunk().getWorld().getName().equals(chunk.getWorld().getName()) && chunkLoader.getChunk().getX() == chunk.getX() && chunkLoader.getChunk().getZ() == chunk.getZ()) {
+				if (chunkLoader.getChunk().getWorld().equals(chunk.getWorld()) && chunkLoader.getChunk().getX() == chunk.getX() && chunkLoader.getChunk().getZ() == chunk.getZ()) {
 					return true;
 				}
 			}
@@ -75,7 +75,7 @@ public class ChunkManager {
 	public static boolean isChunkLoaded(UUID uuid, Chunk chunk) {
 		if (loadedChunks.containsKey(uuid)) {
 			for (ChunkLoader chunkLoader : loadedChunks.get(uuid)) {
-				if (chunkLoader.getChunk().getWorld().getName().equals(chunk.getWorld().getName()) && chunkLoader.getChunk().getX() == chunk.getX() && chunkLoader.getChunk().getZ() == chunk.getZ()) {
+				if (chunkLoader.getChunk().getWorld().equals(chunk.getWorld()) && chunkLoader.getChunk().getX() == chunk.getX() && chunkLoader.getChunk().getZ() == chunk.getZ()) {
 					return true;
 				}
 			}
@@ -84,10 +84,10 @@ public class ChunkManager {
 	}
 
 	private static void loadChunk(Chunk chunk) {
-		DirtLoader.getPlugin().getServer().getWorld(chunk.getWorld().getName()).addPluginChunkTicket(chunk.getX(), chunk.getZ(), DirtLoader.getPlugin());
+		DirtLoader.getPlugin().getServer().getWorld(chunk.getWorld()).addPluginChunkTicket(chunk.getX(), chunk.getZ(), DirtLoader.getPlugin());
 	}
 
 	private static void unloadChunk(Chunk chunk) {
-		DirtLoader.getPlugin().getServer().getWorld(chunk.getWorld().getName()).removePluginChunkTicket(chunk.getX(), chunk.getZ(), DirtLoader.getPlugin());
+		DirtLoader.getPlugin().getServer().getWorld(chunk.getWorld()).removePluginChunkTicket(chunk.getX(), chunk.getZ(), DirtLoader.getPlugin());
 	}
 }

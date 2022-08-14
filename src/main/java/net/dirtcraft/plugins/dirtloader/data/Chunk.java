@@ -3,17 +3,17 @@ package net.dirtcraft.plugins.dirtloader.data;
 import org.bukkit.World;
 
 public class Chunk {
-	private final World world;
+	private final String world;
 	private final int x;
 	private final int z;
 
-	public Chunk(World world, int x, int z) {
+	public Chunk(String world, int x, int z) {
 		this.world = world;
 		this.x = x;
 		this.z = z;
 	}
 
-	public World getWorld() {
+	public String getWorld() {
 		return world;
 	}
 

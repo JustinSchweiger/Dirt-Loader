@@ -30,11 +30,11 @@ public class LoadCommand {
 			return false;
 		}
 
-		String type = args[1].toLowerCase();
+		String type = args[1].toLowerCase().trim();
 		Player player = (Player) sender;
 		UUID ownerUuid = player.getUniqueId();
 
-		Chunk chunk = new Chunk(player.getLocation().getChunk().getWorld(), player.getLocation().getChunk().getX(), player.getLocation().getChunk().getZ());
+		Chunk chunk = new Chunk(player.getLocation().getChunk().getWorld().getName(), player.getLocation().getChunk().getX(), player.getLocation().getChunk().getZ());
 
 		ChunkLoader chunkloader = new ChunkLoader(ownerUuid, chunk, type);
 

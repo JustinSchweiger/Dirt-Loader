@@ -5,15 +5,14 @@ import net.dirtcraft.plugins.dirtloader.database.callbacks.PlayerCallback;
 import net.dirtcraft.plugins.dirtloader.utils.Permissions;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
 import net.dirtcraft.plugins.dirtloader.utils.Utilities;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 
 public class ListCommand {
 
@@ -110,58 +109,92 @@ public class ListCommand {
 		sender.sendMessage(Strings.BAR_TOP);
 		sender.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.GRAY + "'s Chunks:");
 
-		boolean senderEqualsPlayer = sender.getName().equals(player.getName());
+		boolean teleportPerm = sender.hasPermission(Permissions.TELEPORT);
 
 		for (int i = start; i < end; i++) {
-			TextComponent unload = new TextComponent(ChatColor.DARK_GRAY + "[" + ChatColor.RED + "\u2715" + ChatColor.DARK_GRAY + "]");
-			unload.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl unload " + player.getUuid() + " " + player.getChunkLoaders().get(i).getUuid()));
-			unload.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Strings.CLICK_TO_UNLOAD)));
+			BaseComponent[] unloadComponent = new ComponentBuilder("")
+					.append(ChatColor.DARK_GRAY + "[" + ChatColor.RED + "\u2715" + ChatColor.DARK_GRAY + "]")
+					.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl unload " + player.getUuid() + " " + player.getChunkLoaders().get(i).getUuid()))
+					.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Strings.CLICK_TO_UNLOAD))).create();
 
-			TextComponent teleport = new TextComponent(ChatColor.DARK_GRAY + "[" + ChatColor.GREEN + "\u2714 " + ChatColor.DARK_GREEN + "Teleport" + ChatColor.GREEN + " \u2714" + ChatColor.DARK_GRAY + "]");
-			teleport.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl teleport " + player.getChunkLoaders().get(i).getUuid()));
-			teleport.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Strings.CLICK_TO_TELEPORT)));
+			BaseComponent[] teleportComponent = new ComponentBuilder("")
+					.append(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_AQUA + "Teleport" + ChatColor.DARK_GRAY + "]")
+					.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl teleport " + player.getChunkLoaders().get(i).getUuid()))
+					.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(Strings.CLICK_TO_TELEPORT))).create();
 
-
-
-
-			if ((senderEqualsPlayer && permUnload) || (!senderEqualsPlayer && permUnloadOther)) {
-				String[] chunkData = Utilities.getPlayerFile(player).getStringList("chunks").get(i).split("#");
-				TextComponent entry = new TextComponent(ChatColor.DARK_GRAY + "[" + ChatColor.RED + "\u2715" + ChatColor.DARK_GRAY + "]");
-				entry.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl unload " + player.getName() + " " + Utilities.getPlayerFile(player).getStringList("chunks").get(i)));
-				entry.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GRAY + "Unload chunk")));
-				TextComponent chunkloaderPart = new TextComponent(ChatColor.GRAY + " - " + ChatColor.GOLD + "Chunkloader");
-				if (!permTeleport) {
-					chunkloaderPart.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
+			BaseComponent[] chunkloaderPart = new ComponentBuilder("")
+					.append(ChatColor.GOLD + player.getChunkLoaders().get(i).getType().substring(0, 1).toUpperCase() + player.getChunkLoaders().get(i).getType().substring(1).trim() + " Chunkloader")
+					.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
 							ChatColor.GRAY + "Owner" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getName() + "\n" +
 									"\n" +
-									ChatColor.GRAY + "Type" + ChatColor.DARK_GRAY + ": " + ChatColor.AQUA + chunkData[3] + "\n" +
-									ChatColor.GRAY + "World" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[0] + "\n" +
-									ChatColor.GRAY + "Location" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + "Chunk " + ChatColor.DARK_AQUA + chunkData[1] + ChatColor.GOLD + " | " + ChatColor.DARK_AQUA + chunkData[2] + "\n" +
-									ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[4].split("_")[0] + ChatColor.GRAY + " at " + ChatColor.GOLD + chunkData[4].split("_")[1]
-					)));
-				} else {
-					World world = Bukkit.getWorld(chunkData[0]);
-					assert world != null;
-					Chunk chunk = world.getChunkAt(Integer.parseInt(chunkData[1]), Integer.parseInt(chunkData[2]));
-					int x = chunk.getBlock(7, 0, 7).getX();
-					int z = chunk.getBlock(7, 0, 7).getZ();
-					int y = world.getHighestBlockYAt(x, z) + 5;
-					chunkloaderPart.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-							ChatColor.GRAY + "Owner" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getName() + "\n" +
-									"\n" +
-									ChatColor.GRAY + "Type" + ChatColor.DARK_GRAY + ": " + ChatColor.AQUA + chunkData[3] + "\n" +
-									ChatColor.GRAY + "World" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[0] + "\n" +
-									ChatColor.GRAY + "Location" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + "Chunk " + ChatColor.DARK_AQUA + chunkData[1] + ChatColor.GOLD + " | " + ChatColor.DARK_AQUA + chunkData[2] + "\n" +
-									ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[4].split("_")[0] + ChatColor.GRAY + " at " + ChatColor.GOLD + chunkData[4].split("_")[1] + "\n" +
-									"\n" +
-									ChatColor.DARK_AQUA + "Click to teleport to this chunk" + ChatColor.GRAY + "."
-					)));
-					chunkloaderPart.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, Utilities.config.get("general.teleport-command") + " " + sender.getName() + " " + x + " " + y + " " + z));
-				}
-				entry.addExtra(chunkloaderPart);
-				sender.spigot().sendMessage(entry);
+									ChatColor.GRAY + "Type" + ChatColor.DARK_GRAY + ": " + ChatColor.AQUA + player.getChunkLoaders().get(i).getType() + "\n" +
+									ChatColor.GRAY + "World" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getChunkLoaders().get(i).getChunk().getWorld() + "\n" +
+									ChatColor.GRAY + "Location" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + "Chunk " + ChatColor.GRAY + "(" + ChatColor.DARK_AQUA + player.getChunkLoaders().get(i).getChunk().getX() + ChatColor.GRAY + " | " + ChatColor.DARK_AQUA + player.getChunkLoaders().get(i).getChunk().getZ() + ChatColor.GRAY + ")\n" +
+									ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getChunkLoaders().get(i).getCreationTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) + ChatColor.GRAY + " at " + ChatColor.GOLD + player.getChunkLoaders().get(i).getCreationTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+					))).create();
+
+			BaseComponent[] entry;
+			if (teleportPerm) {
+				entry = new ComponentBuilder("")
+						.append(unloadComponent)
+						.append(ChatColor.GRAY + " - ")
+						.event((HoverEvent) null)
+						.event((ClickEvent) null)
+						.append(teleportComponent)
+						.append(ChatColor.GRAY + " - ")
+						.event((HoverEvent) null)
+						.event((ClickEvent) null)
+						.append(chunkloaderPart)
+						.create();
+			} else {
+				entry = new ComponentBuilder("")
+						.append(unloadComponent)
+						.append(ChatColor.GRAY + " - ")
+						.event((HoverEvent) null)
+						.event((ClickEvent) null)
+						.append(chunkloaderPart)
+						.create();
+			}
+
+
+			sender.spigot().sendMessage(entry);
+		}
+
+		TextComponent bottomBar = new TextComponent(Strings.HALF_BAR_BOTTOM);
+		TextComponent pagePrev;
+		if (page == 1) {
+			pagePrev = new TextComponent(ChatColor.BLACK + " \u00AB ");
+			pagePrev.setBold(true);
+			pagePrev.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.RED + "You are already on the first page!")));
+		} else {
+			pagePrev = new TextComponent(ChatColor.GREEN + " \u00AB ");
+			pagePrev.setBold(true);
+			pagePrev.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GREEN + "Previous page")));
+			if (sender.hasPermission(Permissions.LIST_OTHER)) {
+				pagePrev.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl list " + player.getName() + " " + (page - 1)));
+			} else {
+				pagePrev.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl list " + (page - 1)));
 			}
 		}
-		sender.sendMessage(Strings.BAR_BOTTOM);*/
+		bottomBar.addExtra(pagePrev);
+		bottomBar.addExtra(ChatColor.DARK_AQUA + " " + page + ChatColor.GRAY + "  /  " + ChatColor.DARK_AQUA + maxPages + " ");
+		TextComponent pageNext;
+		if (page == maxPages) {
+			pageNext = new TextComponent(ChatColor.BLACK + " \u00BB ");
+			pagePrev.setBold(true);
+			pageNext.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.RED + "You are already on the last page!")));
+		} else {
+			pageNext = new TextComponent(ChatColor.GREEN + " \u00BB ");
+			pagePrev.setBold(true);
+			pageNext.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GREEN + "Next page")));
+			if (sender.hasPermission(Permissions.LIST_OTHER)) {
+				pageNext.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl list " + player.getName() + " " + (page + 1)));
+			} else {
+				pageNext.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl list " + (page + 1)));
+			}
+		}
+		bottomBar.addExtra(pageNext);
+		bottomBar.addExtra(Strings.HALF_BAR_BOTTOM);
+		sender.spigot().sendMessage(bottomBar);
 	}
 }

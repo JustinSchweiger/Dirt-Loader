@@ -1,5 +1,6 @@
 package net.dirtcraft.plugins.dirtloader.commands;
 
+import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.utils.Permissions;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
 import net.dirtcraft.plugins.dirtloader.utils.Utilities;
@@ -33,6 +34,8 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			return true;
 		}
 
+		System.out.println(ChunkManager.getLoadedChunks().toString());
+
 		String arg = args[0].toLowerCase();
 
 		switch (arg) {
@@ -50,6 +53,8 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 				return LoadCommand.run(sender, args);
 			case "unload":
 				return UnloadCommand.run(sender, args);
+			case "teleport":
+				return TeleportCommand.run(sender, args);
 			default:
 				sender.sendMessage(Strings.UNKNOWN_COMMAND + " " + ChatColor.DARK_RED + arg);
 		}
@@ -77,58 +82,6 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		}
 
 		return false;
-	}
-
-	private void showList(CommandSender sender, Player player, int page) {
-		/*
-		sender.sendMessage(Strings.BAR_TOP);
-		sender.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.GRAY + "'s Chunks (" + ChatColor.DARK_AQUA + page + ChatColor.GRAY + "/" + ChatColor.DARK_AQUA + maxPages + ChatColor.GRAY + "):");
-
-		boolean permUnload = sender.hasPermission(Permissions.UNLOAD);
-		boolean permUnloadOther = sender.hasPermission(Permissions.UNLOAD_OTHER);
-		boolean permTeleport = sender.hasPermission(Permissions.TELEPORT);
-		boolean senderEqualsPlayer = sender.getName().equals(player.getName());
-
-		for (int i = start; i < end; i++) {
-			if ((senderEqualsPlayer && permUnload) || (!senderEqualsPlayer && permUnloadOther)) {
-				String[] chunkData = Utilities.getPlayerFile(player).getStringList("chunks").get(i).split("#");
-				TextComponent entry = new TextComponent(ChatColor.DARK_GRAY + "[" + ChatColor.RED + "\u2715" + ChatColor.DARK_GRAY + "]");
-				entry.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl unload " + player.getName() + " " + Utilities.getPlayerFile(player).getStringList("chunks").get(i)));
-				entry.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GRAY + "Unload chunk")));
-				TextComponent chunkloaderPart = new TextComponent(ChatColor.GRAY + " - " + ChatColor.GOLD + "Chunkloader");
-				if (!permTeleport) {
-					chunkloaderPart.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-							ChatColor.GRAY + "Owner" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getName() + "\n" +
-									"\n" +
-									ChatColor.GRAY + "Type" + ChatColor.DARK_GRAY + ": " + ChatColor.AQUA + chunkData[3] + "\n" +
-									ChatColor.GRAY + "World" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[0] + "\n" +
-									ChatColor.GRAY + "Location" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + "Chunk " + ChatColor.DARK_AQUA + chunkData[1] + ChatColor.GOLD + " | " + ChatColor.DARK_AQUA + chunkData[2] + "\n" +
-									ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[4].split("_")[0] + ChatColor.GRAY + " at " + ChatColor.GOLD + chunkData[4].split("_")[1]
-					)));
-				} else {
-					World world = Bukkit.getWorld(chunkData[0]);
-					assert world != null;
-					Chunk chunk = world.getChunkAt(Integer.parseInt(chunkData[1]), Integer.parseInt(chunkData[2]));
-					int x = chunk.getBlock(7, 0, 7).getX();
-					int z = chunk.getBlock(7, 0, 7).getZ();
-					int y = world.getHighestBlockYAt(x, z) + 5;
-					chunkloaderPart.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-							ChatColor.GRAY + "Owner" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getName() + "\n" +
-									"\n" +
-									ChatColor.GRAY + "Type" + ChatColor.DARK_GRAY + ": " + ChatColor.AQUA + chunkData[3] + "\n" +
-									ChatColor.GRAY + "World" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[0] + "\n" +
-									ChatColor.GRAY + "Location" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + "Chunk " + ChatColor.DARK_AQUA + chunkData[1] + ChatColor.GOLD + " | " + ChatColor.DARK_AQUA + chunkData[2] + "\n" +
-									ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + chunkData[4].split("_")[0] + ChatColor.GRAY + " at " + ChatColor.GOLD + chunkData[4].split("_")[1] + "\n" +
-									"\n" +
-									ChatColor.DARK_AQUA + "Click to teleport to this chunk" + ChatColor.GRAY + "."
-					)));
-					chunkloaderPart.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, Utilities.config.get("general.teleport-command") + " " + sender.getName() + " " + x + " " + y + " " + z));
-				}
-				entry.addExtra(chunkloaderPart);
-				sender.spigot().sendMessage(entry);
-			}
-		}
-		sender.sendMessage(Strings.BAR_BOTTOM);*/
 	}
 
 	private void showInfo(CommandSender sender, String chunkString) {

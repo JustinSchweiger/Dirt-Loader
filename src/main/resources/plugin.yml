@@ -17,6 +17,7 @@ permissions:
             dirtloader.bal: true
             dirtloader.load: true
             dirtloader.unload: true
+            dirtloader.teleport: true
     dirtloader.advanced:
         description: Advanced permission for players to use DirtLoader
         children:
@@ -53,3 +54,5 @@ permissions:
         description: Permission to unload own chunks
     dirtloader.unload.other:
         description: Permission to unload other players chunks
+    dirtloader.teleport:
+        description: Permission to use the teleport functionality

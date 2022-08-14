@@ -63,4 +63,10 @@ public class Database {
 
 		Utilities.log(Level.INFO, "Database initialised!");
 	}
+
+	public static void closeDatabase() {
+		if (ds != null) {
+			ds.close();
+		}
+	}
 }
