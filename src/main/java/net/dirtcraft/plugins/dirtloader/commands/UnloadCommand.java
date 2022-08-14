@@ -1,11 +1,7 @@
 package net.dirtcraft.plugins.dirtloader.commands;
 
-import net.dirtcraft.plugins.dirtloader.DirtLoader;
-import net.dirtcraft.plugins.dirtloader.data.Chunk;
-import net.dirtcraft.plugins.dirtloader.data.ChunkLoader;
 import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.database.DatabaseOperation;
-import net.dirtcraft.plugins.dirtloader.database.callbacks.UnloadChunkCallback;
 import net.dirtcraft.plugins.dirtloader.utils.Permissions;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
 import net.dirtcraft.plugins.dirtloader.utils.Utilities;
@@ -37,9 +33,11 @@ public class UnloadCommand {
 
 		Player player = (Player) sender;
 
-		if (!args[1].equals(player.getUniqueId().toString()) || !sender.hasPermission(Permissions.UNLOAD_OTHER)) {
-			sender.sendMessage(Strings.NO_PERMISSION);
-			return true;
+		if (!args[1].equals(player.getUniqueId().toString())) {
+			if (!sender.hasPermission(Permissions.UNLOAD_OTHER)) {
+				sender.sendMessage(Strings.NO_PERMISSION);
+				return true;
+			}
 		}
 
 		unloadChunk(sender, UUID.fromString(args[1]), UUID.fromString(args[2]));
