@@ -22,6 +22,8 @@ public class Strings {
 	public static final String PLAYER_NOT_FOUND = PREFIX + ChatColor.YELLOW + "No results found for player ";
 	public static final String UNKNOWN_COMMAND = PREFIX + ChatColor.RED + "Unknown command ";
 	public static final String INVALID_USERNAME_OR_UUID = PREFIX + ChatColor.RED + "Invalid username or UUID!";
+	public static final String PURGE_OFFLINE_LOADER = "Purging offline loader at ({X} | {Z})";
+	public static final String NO_PURGE_BECAUSE_ONLINE = "Chunk ({X} | {Z}) would have been purged but the player was online!";
 
 	// ------------------------------------------------------- LOAD COMMAND -------------------------------------------------------
 	public static final String CHUNK_ALREADY_LOADED = PREFIX + ChatColor.RED + "This chunk is already loaded!";

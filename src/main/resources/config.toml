@@ -1,17 +1,16 @@
 # Configuration file for Dirt-Loader
 
 [general]
-# Wether debug-messages should be printed to the console
+# Wether debug-messages should be printed to the console (has some usefull information)
 debug = true
 # Wether debug-messages should be colored in the console
 coloredDebug = true
+# Wether to log exact chunk load/unload coordinates (can get a bit spammy)
+logDebugCoords = true
 # The amount of online loaders new players get.
 onlineLoaderAmount = 5
 # The amount of offline loaders new players get.
 offlineLoaderAmount = 5
-# The command that will be used for teleportation.
-# This command will be run by the player so they need to have permission to use it.
-teleportCommand = "/minecraft:tp"
 # How often should the server perform a check for overdue offline chunkloaders.
 # This value is in minutes.
 offlineLoaderCheckInterval = 5

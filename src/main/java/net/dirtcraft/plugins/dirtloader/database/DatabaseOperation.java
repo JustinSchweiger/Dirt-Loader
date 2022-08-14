@@ -48,6 +48,7 @@ public class DatabaseOperation {
 				List<ChunkLoader> chunkloadersFound = new ArrayList<>();
 				while (chunkloaderResult.next()) {
 					LocalDateTime creationTime = LocalDateTime.parse(chunkloaderResult.getString("loader_creationtime"), DateTimeFormatter.ISO_DATE_TIME);
+					LocalDateTime shutdownTime = LocalDateTime.parse(chunkloaderResult.getString("loader_shutdowntime"), DateTimeFormatter.ISO_DATE_TIME);
 					chunkloadersFound.add(new ChunkLoader(
 							UUID.fromString(chunkloaderResult.getString("loader_uuid")),
 							UUID.fromString(chunkloaderResult.getString("player_owneruuid")),
@@ -56,8 +57,9 @@ public class DatabaseOperation {
 									chunkloaderResult.getInt("loader_x"),
 									chunkloaderResult.getInt("loader_z")
 							),
-							chunkloaderResult.getString("loader_type"),
-							creationTime
+							chunkloaderResult.getString("loader_type").trim(),
+							creationTime,
+							shutdownTime
 					));
 				}
 
@@ -68,7 +70,6 @@ public class DatabaseOperation {
 						playerResult.getInt("player_offlineavailable"),
 						playerResult.getInt("player_onlineused"),
 						playerResult.getInt("player_offlineused"),
-						LocalDateTime.parse(playerResult.getString("player_shutdowntime"), DateTimeFormatter.ISO_DATE_TIME),
 						chunkloadersFound
 				);
 
@@ -85,7 +86,7 @@ public class DatabaseOperation {
 	public static void insertPlayer(final Player player) {
 		Bukkit.getScheduler().runTaskAsynchronously(DirtLoader.getPlugin(), () -> {
 			try (Connection connection = Database.getConnection();
-			     PreparedStatement statement = connection.prepareStatement("INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?, ?)")
+			     PreparedStatement statement = connection.prepareStatement("INSERT INTO PLAYER VALUES (?, ?, ?, ?, ?, ?)")
 			) {
 				statement.setString(1, player.getUuid().toString());
 				statement.setString(2, player.getName());
@@ -93,7 +94,6 @@ public class DatabaseOperation {
 				statement.setInt(4, player.getOfflineAvailable());
 				statement.setInt(5, player.getOnlineUsed());
 				statement.setInt(6, player.getOfflineUsed());
-				statement.setString(7, player.getShutdownTime().format(DateTimeFormatter.ISO_DATE_TIME));
 
 				statement.executeUpdate();
 			} catch (SQLException ignored) {}
@@ -198,10 +198,11 @@ public class DatabaseOperation {
 			}
 
 			try (Connection connection = Database.getConnection();
-			     PreparedStatement insertLoader = connection.prepareStatement("INSERT INTO LOADER VALUES (?, ?, ?, ?, ?, ?, ?)");
+			     PreparedStatement insertLoader = connection.prepareStatement("INSERT INTO LOADER VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 			     PreparedStatement updatePlayerOnline = connection.prepareStatement("UPDATE PLAYER SET PLAYER_ONLINEUSED = PLAYER_ONLINEUSED + 1 WHERE PLAYER_UUID = ?");
 			     PreparedStatement updatePlayerOffline = connection.prepareStatement("UPDATE PLAYER SET PLAYER_OFFLINEUSED = PLAYER_OFFLINEUSED + 1 WHERE PLAYER_UUID = ?")
 			) {
+				LocalDateTime shutdownTime = LocalDateTime.now().plusHours(Utilities.config.offlineLoader.offlineLoaderDuration);
 				insertLoader.setString(1, chunkloader.getUuid().toString());
 				insertLoader.setString(2, ownerUuid.toString());
 				insertLoader.setString(3, type);
@@ -209,6 +210,7 @@ public class DatabaseOperation {
 				insertLoader.setInt(5, chunkloader.getChunk().getX());
 				insertLoader.setInt(6, chunkloader.getChunk().getZ());
 				insertLoader.setString(7, chunkloader.getCreationTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+				insertLoader.setString(8, shutdownTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 				updatePlayerOnline.setString(1, ownerUuid.toString());
 				updatePlayerOffline.setString(1, ownerUuid.toString());
 				insertLoader.executeUpdate();
@@ -251,12 +253,14 @@ public class DatabaseOperation {
 						resultSet.getInt("LOADER_Z")
 				);
 				LocalDateTime creationTime = LocalDateTime.parse(resultSet.getString("LOADER_CREATIONTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+				LocalDateTime shutdownTime = LocalDateTime.parse(resultSet.getString("LOADER_SHUTDOWNTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 				ChunkLoader chunkloader = new ChunkLoader(
 						chunkloaderUuid,
 						playerUuid,
 						chunk,
 						resultSet.getString("LOADER_TYPE"),
-						creationTime
+						creationTime,
+						shutdownTime
 				);
 
 				String type = resultSet.getString("LOADER_TYPE").trim();
@@ -336,7 +340,8 @@ public class DatabaseOperation {
 									UUID.fromString(resultSet.getString("PLAYER_OWNERUUID")),
 									chunk,
 									resultSet.getString("LOADER_TYPE"),
-									LocalDateTime.parse(resultSet.getString("LOADER_CREATIONTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+									LocalDateTime.parse(resultSet.getString("LOADER_CREATIONTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+									LocalDateTime.parse(resultSet.getString("LOADER_SHUTDOWNTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 							)
 					);
 				}
@@ -356,10 +361,10 @@ public class DatabaseOperation {
 		});
 	}
 
-	public static void updatePlayerShutdownTime(final UUID uniqueId, final ShutdownTimeCallback shutdownTimeCallback) {
+	public static void updateShutdownTime(final UUID uniqueId, final ShutdownTimeCallback shutdownTimeCallback) {
 		Bukkit.getScheduler().runTaskAsynchronously(DirtLoader.getPlugin(), () -> {
 			try (Connection connection = Database.getConnection();
-			     PreparedStatement statement = connection.prepareStatement("UPDATE PLAYER SET PLAYER_SHUTDOWNTIME = ? WHERE PLAYER_UUID = ?")
+			     PreparedStatement statement = connection.prepareStatement("UPDATE LOADER SET LOADER_SHUTDOWNTIME = ? WHERE PLAYER_OWNERUUID = ?")
 			) {
 				LocalDateTime shutdownTime = LocalDateTime.now().plusHours(Utilities.config.offlineLoader.offlineLoaderDuration);
 				statement.setString(1, shutdownTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -371,6 +376,37 @@ public class DatabaseOperation {
 					Utilities.log(Level.SEVERE, "Could not execute query!");
 					e.printStackTrace();
 				}
+			}
+		});
+	}
+
+	public static void getOfflineChunkloaders(final OfflineChunkloaderCallback offlineChunkloaderCallback) {
+		Bukkit.getScheduler().runTaskAsynchronously(DirtLoader.getPlugin(), () -> {
+			try (Connection connection = Database.getConnection();
+			     PreparedStatement statement = connection.prepareStatement("SELECT * FROM LOADER WHERE LOADER_TYPE = 'offline'")
+			) {
+				ResultSet resultSet = statement.executeQuery();
+				List<ChunkLoader> chunkloaders = new ArrayList<>();
+				while (resultSet.next()) {
+					chunkloaders.add(
+							new ChunkLoader(
+									UUID.fromString(resultSet.getString("LOADER_UUID")),
+									UUID.fromString(resultSet.getString("PLAYER_OWNERUUID")),
+									new Chunk(
+											resultSet.getString("LOADER_WORLD").trim(),
+											resultSet.getInt("LOADER_X"),
+											resultSet.getInt("LOADER_Z")
+									),
+									resultSet.getString("LOADER_TYPE").trim(),
+									LocalDateTime.parse(resultSet.getString("LOADER_CREATIONTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+									LocalDateTime.parse(resultSet.getString("LOADER_SHUTDOWNTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+							)
+					);
+				}
+
+				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> offlineChunkloaderCallback.onSuccess(chunkloaders));
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
 			}
 		});
 	}

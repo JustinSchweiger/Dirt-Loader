@@ -24,22 +24,24 @@ public class PlayerListener implements Listener {
 		String name = e.getPlayer().getName();
 		addPossibleNewPlayerToDatabase(uuid, name);
 		loadAllChunksOfPlayer(uuid);
-		updatePlayerShutdownTime(uuid, name);
+		updateShutdownTime(uuid, name);
 	}
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		UUID uuid = e.getPlayer().getUniqueId();
 		String name = e.getPlayer().getName();
-		updatePlayerShutdownTime(uuid, name);
+		updateShutdownTime(uuid, name);
 		handleUnloadingOfChunks(uuid);
 	}
 
-	private static void updatePlayerShutdownTime(UUID uuid, String name) {
-		DatabaseOperation.updatePlayerShutdownTime(uuid, shutdownTime -> {
+	private static void updateShutdownTime(UUID uuid, String name) {
+		DatabaseOperation.updateShutdownTime(uuid, (shutdownTime) -> {
 			if (Utilities.config.general.debug) {
 				Utilities.log(Level.INFO, "Updated " + name + "'s shutdown time to " + shutdownTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")));
 			}
+
+			ChunkManager.updateShutdownTime(uuid, shutdownTime);
 		});
 	}
 
@@ -47,12 +49,22 @@ public class PlayerListener implements Listener {
 		DatabaseOperation.getPlayer("player_uuid", uuid.toString(), new PlayerCallback() {
 			@Override
 			public void onPlayerFound(Player player) {
+				int onlineLoaded = 0;
+				int offlineLoaded = 0;
+
 				for (ChunkLoader chunkloader : player.getChunkLoaders()) {
-					ChunkManager.addChunk(player.getUuid(), chunkloader);
+					if (chunkloader.getType().equalsIgnoreCase("online")) {
+						ChunkManager.addChunk(player.getUuid(), chunkloader);
+						onlineLoaded++;
+					} else if (chunkloader.getShutdownTime().isBefore(LocalDateTime.now())) {
+						ChunkManager.addChunk(player.getUuid(), chunkloader);
+						offlineLoaded++;
+					}
 				}
 
 				if (Utilities.config.general.debug) {
-					Utilities.log(Level.INFO, "Loading " + player.getChunkLoaders().size() + " chunks for player " + player.getName());
+					Utilities.log(Level.INFO, "Loading " + onlineLoaded + " online chunks for player " + player.getName());
+					Utilities.log(Level.INFO, "Loading " + offlineLoaded + " offline chunks for player " + player.getName());
 				}
 			}
 
@@ -72,29 +84,29 @@ public class PlayerListener implements Listener {
 				Utilities.config.general.onlineLoaderAmount,
 				Utilities.config.general.offlineLoaderAmount,
 				0,
-				0,
-				LocalDateTime.now().plusHours(Utilities.config.offlineLoader.offlineLoaderDuration)
+				0
 		);
 		DatabaseOperation.insertPlayer(player);
 	}
 
 	private static void handleUnloadingOfChunks(UUID uuid) {
-		List<ChunkLoader> chunkloaders = ChunkManager.getChunkloadersOfPlayer(uuid);
-		System.out.println(chunkloaders);
+		List<ChunkLoader> chunkloaders = new ArrayList<>(ChunkManager.getChunkloadersOfPlayer(uuid));
 
 		for (ChunkLoader chunkloader : chunkloaders) {
-			System.out.println("called in loop");
 			boolean unloadChunk = !isSameChunkLoadedBySomeOneElse(chunkloader.getChunk(), uuid);
-			System.out.println(unloadChunk);
 			if (unloadChunk) {
 				if (!chunkloader.getType().equalsIgnoreCase("offline")) {
 					ChunkManager.removeChunk(uuid, chunkloader);
+				}
+			} else {
+				if (!chunkloader.getType().equalsIgnoreCase("offline")) {
+					ChunkManager.removeChunkWithoutUnload(uuid, chunkloader);
 				}
 			}
 		}
 	}
 
-	private static boolean isSameChunkLoadedBySomeOneElse(Chunk chunk, UUID uuid) {
+	public static boolean isSameChunkLoadedBySomeOneElse(Chunk chunk, UUID uuid) {
 		Optional<UUID> o = ChunkManager.getAllOtherLoadedChunkloaders(uuid)
 				.stream()
 				.filter(

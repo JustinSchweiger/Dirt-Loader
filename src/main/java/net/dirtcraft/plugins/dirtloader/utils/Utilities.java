@@ -4,6 +4,7 @@ import com.moandjiezana.toml.Toml;
 import net.dirtcraft.plugins.dirtloader.DirtLoader;
 import net.dirtcraft.plugins.dirtloader.commands.BaseCommand;
 import net.dirtcraft.plugins.dirtloader.config.Config;
+import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.listeners.PlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,6 +15,9 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class Utilities {
@@ -86,7 +90,33 @@ public class Utilities {
 		return true;
 	}
 
+	public static boolean isPlayerOnline(UUID uuid) {
+		List<Player> onlinePlayers = new ArrayList<>(DirtLoader.getPlugin().getServer().getOnlinePlayers());
+		for (Player player : onlinePlayers) {
+			if (player.getUniqueId().equals(uuid)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static boolean isPlayerOnline(String name) {
+		List<Player> onlinePlayers = new ArrayList<>(DirtLoader.getPlugin().getServer().getOnlinePlayers());
+		for (Player player : onlinePlayers) {
+			if (player.getName().equals(name)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public static void playSuccessSound(CommandSender sender) {
+		if (!(sender instanceof Player)) {
+			return;
+		}
+
 		Player player = (Player) sender;
 		if (Utilities.config.sound.playSuccessSound) {
 			String sound = Utilities.config.sound.successSound;
@@ -98,6 +128,10 @@ public class Utilities {
 	}
 
 	public static void playErrorSound(CommandSender sender) {
+		if (!(sender instanceof Player)) {
+			return;
+		}
+
 		Player player = (Player) sender;
 		if (Utilities.config.sound.playErrorSound) {
 			String sound = Utilities.config.sound.errorSound;
@@ -109,6 +143,10 @@ public class Utilities {
 	}
 
 	public static void playUnloadSound(CommandSender sender) {
+		if (!(sender instanceof Player)) {
+			return;
+		}
+
 		Player player = (Player) sender;
 		if (Utilities.config.sound.playUnloadSound) {
 			String sound = Utilities.config.sound.unloadSound;

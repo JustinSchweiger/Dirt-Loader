@@ -24,9 +24,7 @@ public class Database {
 			ds.setConnectionTimeout(1000);
 			ds.setLoginTimeout(5);
 			ds.setAutoCommit(true);
-			if (Utilities.config.general.debug) {
-				Utilities.log(Level.INFO, "Creating new H2 Hikari Data Source!");
-			}
+			Utilities.log(Level.INFO, "Creating new Data Source ...");
 		} catch (SQLException e) {
 			if (Utilities.config.general.debug) {
 				Utilities.log(Level.SEVERE, "Could not create DataSource! Shutting down plugin ...");

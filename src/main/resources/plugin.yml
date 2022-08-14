@@ -23,9 +23,12 @@ permissions:
         description: Advanced permission for players to use DirtLoader
         children:
             dirtloader.base: true
+            dirtloader.list: true
             dirtloader.list.user: true
+            dirtloader.bal: true
             dirtloader.bal.user: true
             dirtloader.load: true
+            dirtloader.unload: true
             dirtloader.unload.other: true
             dirtloader.info: true
             dirtloader.teleport: true
@@ -33,9 +36,12 @@ permissions:
         description: Admin permission for players to use DirtLoader
         children:
             dirtloader.base: true
+            dirtloader.list: true
             dirtloader.list.user: true
+            dirtloader.bal: true
             dirtloader.bal.user: true
             dirtloader.load: true
+            dirtloader.unload: true
             dirtloader.unload.other: true
             dirtloader.info: true
             dirtloader.teleport: true

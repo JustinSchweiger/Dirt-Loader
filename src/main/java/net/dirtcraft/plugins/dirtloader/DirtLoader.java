@@ -16,8 +16,10 @@ public final class DirtLoader extends JavaPlugin {
 	public void onEnable() {
 		plugin = this;
 		Utilities.loadConfig();
-		ChunkManager.init();
 		Database.initialiseDatabase();
+		ChunkManager.init();
+		ChunkManager.loadActiveOfflineChunks();
+		ChunkManager.startOfflinePurgeTask();
 		Utilities.registerListener();
 		Utilities.registerCommands();
 	}

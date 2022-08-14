@@ -4,6 +4,7 @@ import net.dirtcraft.plugins.dirtloader.data.ChunkLoader;
 import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.utils.Permissions;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
+import net.dirtcraft.plugins.dirtloader.utils.Utilities;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -32,12 +33,16 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		}
 
 		String arg = args[0].toLowerCase();
+		/*
+		                      !!!!!!!!!!ACTIVATE FOR OUTPUT OF LOADED CHUNKS VARIABLE AFTER EVERY COMMAND!!!!!!!!!!!!!
+
 		HashMap<UUID, List<ChunkLoader>> chunkloaders = ChunkManager.getLoadedChunks();
 		for (Map.Entry<UUID, List<ChunkLoader>> chunkloader : chunkloaders.entrySet()) {
 			for (ChunkLoader loader : chunkloader.getValue()) {
-				System.out.println("UUID: " + loader.getOwnerUuid() + "\t\t\t" + loader.getChunk().getX() + " | " + loader.getChunk().getZ());
+				System.out.println("UUID: " + loader.getOwnerUuid() + "\t\t" + loader.getChunk().getX() + " | " + loader.getChunk().getZ());
 			}
 		}
+		*/
 
 		switch (arg) {
 			case "list":
@@ -59,8 +64,6 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			default:
 				sender.sendMessage(Strings.UNKNOWN_COMMAND + " " + ChatColor.DARK_RED + arg);
 		}
-
-
 
 		return true;
 	}
