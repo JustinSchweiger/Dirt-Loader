@@ -6,11 +6,11 @@ debug = true
 # Wether debug-messages should be colored in the console
 coloredDebug = true
 # Wether to log exact chunk load/unload coordinates (can get a bit spammy)
-logDebugCoords = true
+logDebugCoords = false
 # The amount of online loaders new players get.
-onlineLoaderAmount = 5
+onlineLoaderAmount = 3
 # The amount of offline loaders new players get.
-offlineLoaderAmount = 5
+offlineLoaderAmount = 0
 # How often should the server perform a check for overdue offline chunkloaders.
 # This value is in minutes.
 offlineLoaderCheckInterval = 5
