@@ -1,13 +1,8 @@
 package net.dirtcraft.plugins.dirtloader.commands;
 
-import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.utils.Permissions;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
-import net.dirtcraft.plugins.dirtloader.utils.Utilities;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -34,8 +29,6 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 			return true;
 		}
 
-		System.out.println(ChunkManager.getLoadedChunks().toString());
-
 		String arg = args[0].toLowerCase();
 
 		switch (arg) {
@@ -59,88 +52,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 				sender.sendMessage(Strings.UNKNOWN_COMMAND + " " + ChatColor.DARK_RED + arg);
 		}
 
-
-		if (args[0].equalsIgnoreCase("info") && sender.hasPermission(Permissions.INFO)) {
-			if (args.length != 1) {
-				sender.sendMessage(Strings.INVALID_ARGUMENTS_USAGE + ChatColor.RED + "/dl info");
-				return false;
-			}
-
-			if (!(sender instanceof Player)) {
-				sender.sendMessage(Strings.NO_CONSOLE);
-				return false;
-			}
-
-			Player player = (Player) sender;
-			Chunk currentChunk = player.getLocation().getChunk();
-			int chunkX = currentChunk.getX();
-			int chunkZ = currentChunk.getZ();
-			String world = currentChunk.getWorld().getName();
-			String chunkString = world + "#" + chunkX + "#" + chunkZ;
-
-			showInfo(sender, chunkString);
-		}
-
-		return false;
-	}
-
-	private void showInfo(CommandSender sender, String chunkString) {
-		/*File[] fileList = Utilities.getAllPlayerdataFiles();
-		HashMap<String, String> loadersFound = new HashMap<>();
-
-		if (fileList == null) {
-			sender.sendMessage(ChatColor.RED + "No playerdata found!");
-			return;
-		}
-
-		for (File file : fileList) {
-			if (file.isFile()) {
-				FileConfiguration playerFile = YamlConfiguration.loadConfiguration(file);
-				for (String chunk : playerFile.getStringList("chunks")) {
-					if (chunk.contains(chunkString)) {
-						loadersFound.put(playerFile.getString("name"), chunk);
-					}
-				}
-			}
-		}
-
-		if (loadersFound.isEmpty()) {
-			sender.sendMessage(Strings.NO_LOADERS_FOUND_IN_CHUNK);
-			return;
-		}
-
-		sender.sendMessage(Strings.BAR_TOP);
-		sender.sendMessage(ChatColor.GRAY + "Chunk ( " + ChatColor.DARK_AQUA + chunkString.split("#")[1] + ChatColor.GOLD + " | " + ChatColor.DARK_AQUA + chunkString.split("#")[2] + ChatColor.GRAY + " ) is loaded by:");
-
-
-		for (Map.Entry<String, String> entry : loadersFound.entrySet()) {
-			TextComponent foundLoader = null;
-			if (sender.hasPermission(Permissions.UNLOAD_OTHER)) {
-				foundLoader = new TextComponent(ChatColor.DARK_GRAY + "[" + ChatColor.RED + "\u2715" + ChatColor.DARK_GRAY + "]");
-				foundLoader.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dl unload " + entry.getKey() + " " + entry.getValue()));
-				foundLoader.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(ChatColor.GRAY + "Unload chunk")));
-			}
-
-			TextComponent chunkloaderPart = new TextComponent(ChatColor.GRAY + " - " + ChatColor.GOLD + entry.getKey());
-			chunkloaderPart.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-					ChatColor.GRAY + "Owner" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + entry.getKey() + "\n" +
-							"\n" +
-							ChatColor.GRAY + "Type" + ChatColor.DARK_GRAY + ": " + ChatColor.AQUA + entry.getValue().split("#")[3] + "\n" +
-							ChatColor.GRAY + "World" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + entry.getValue().split("#")[0] + "\n" +
-							ChatColor.GRAY + "Location" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + "Chunk " + ChatColor.DARK_AQUA + entry.getValue().split("#")[1] + ChatColor.GOLD + " | " + ChatColor.DARK_AQUA + entry.getValue().split("#")[2] + "\n" +
-							ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + entry.getValue().split("#")[4].split("_")[0] + ChatColor.GRAY + " at " + ChatColor.GOLD + entry.getValue().split("#")[4].split("_")[1]
-			)));
-			chunkloaderPart.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, ""));
-
-			if (foundLoader == null) {
-				sender.spigot().sendMessage(chunkloaderPart);
-			} else {
-				foundLoader.addExtra(chunkloaderPart);
-				sender.spigot().sendMessage(foundLoader);
-			}
-
-			sender.sendMessage(Strings.BAR_BOTTOM);
-		}*/
+		return true;
 	}
 
 	private ArrayList<String> getListings(CommandSender sender) {

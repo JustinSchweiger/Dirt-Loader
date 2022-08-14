@@ -43,9 +43,7 @@ public class DatabaseOperation {
 						Utilities.log(Level.WARNING, "No results found for " + value);
 					}
 
-					Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> {
-						callback.onPlayerNotFound(value);
-					});
+					Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> callback.onPlayerNotFound(value));
 					return;
 				}
 
@@ -317,6 +315,46 @@ public class DatabaseOperation {
 						resultSet.getInt("LOADER_Z")
 				);
 				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> teleportCallback.onSuccess(chunk));
+			} catch (SQLException e) {
+				if (Utilities.config.general.debug) {
+					Utilities.log(Level.SEVERE, "Could not execute query!");
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public static void findChunkloadersFromChunk(final Chunk chunk, final InfoCallback infoCallback) {
+		Bukkit.getScheduler().runTaskAsynchronously(DirtLoader.getPlugin(), () -> {
+			try (Connection connection = Database.getConnection();
+			     PreparedStatement statement = connection.prepareStatement("SELECT * FROM LOADER WHERE LOADER_WORLD = ? AND LOADER_X = ? AND LOADER_Z = ?")
+			) {
+				statement.setString(1, chunk.getWorld());
+				statement.setInt(2, chunk.getX());
+				statement.setInt(3, chunk.getZ());
+				ResultSet resultSet = statement.executeQuery();
+
+				List<ChunkLoader> chunkloaders = new ArrayList<>();
+				while (resultSet.next()) {
+					chunkloaders.add(
+							new ChunkLoader(
+									UUID.fromString(resultSet.getString("LOADER_UUID")),
+									UUID.fromString(resultSet.getString("PLAYER_OWNERUUID")),
+									chunk,
+									resultSet.getString("LOADER_TYPE"),
+									LocalDateTime.parse(resultSet.getString("LOADER_CREATIONTIME"), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+							)
+					);
+				}
+
+				if (chunkloaders.size() == 0) {
+					Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), infoCallback::onNoChunkloaderFound);
+					return;
+				}
+
+				System.out.println(chunkloaders.size());
+
+				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> infoCallback.onChunkloaderFound(chunkloaders));
 			} catch (SQLException e) {
 				if (Utilities.config.general.debug) {
 					Utilities.log(Level.SEVERE, "Could not execute query!");

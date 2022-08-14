@@ -47,7 +47,8 @@ public class Strings {
 	public static final String CONFIG_RELOADED = PREFIX + ChatColor.GREEN + "Config reloaded!";
 
 	// ------------------------------------------------------- INFO COMMAND -------------------------------------------------------
-	public static final String NO_LOADERS_FOUND_IN_CHUNK = PREFIX + ChatColor.RED + "No chunkloaders found in chunk!";
+	public static final String NO_LOADERS_FOUND_IN_CHUNK = PREFIX + ChatColor.DARK_RED + "No chunkloaders found in this chunk!";
+	public static final String CHUNKLOADERS_FOUND_IN_CHUNK = ChatColor.GRAY + "Chunkloaders found in Chunk (" + ChatColor.DARK_AQUA + "{X} " + ChatColor.GRAY + "| " + ChatColor.DARK_AQUA + "{Z}" + ChatColor.GRAY + ")" + ChatColor.GRAY + ":";
 
 	// ----------------------------------------------------- TELEPORT COMMAND -----------------------------------------------------
 	public static final String NOT_CHUNKLOADER_OWNER = PREFIX + ChatColor.RED + "You are not the owner of this chunkloader!";
