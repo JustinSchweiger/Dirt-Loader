@@ -48,4 +48,9 @@ public class Strings {
 
 	// ------------------------------------------------------- INFO COMMAND -------------------------------------------------------
 	public static final String NO_LOADERS_FOUND_IN_CHUNK = PREFIX + ChatColor.RED + "No chunkloaders found in chunk!";
+
+	// ----------------------------------------------------- TELEPORT COMMAND -----------------------------------------------------
+	public static final String NOT_CHUNKLOADER_OWNER = PREFIX + ChatColor.RED + "You are not the owner of this chunkloader!";
+	public static final String CHUNKLOADER_NOT_FOUND = PREFIX + ChatColor.RED + "Chunkloader not found!";
+	public static final String TELEPORTED = PREFIX + ChatColor.GREEN + "You have been teleported to Chunk " + ChatColor.GRAY + "(" + ChatColor.DARK_AQUA + "{X} " + ChatColor.GRAY + "| " + ChatColor.DARK_AQUA + "{Z}" + ChatColor.GRAY + ")" + ChatColor.GRAY + "!";
 }

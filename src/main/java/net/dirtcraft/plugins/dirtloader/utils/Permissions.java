@@ -12,5 +12,6 @@ public class Permissions {
 	public static final String UNLOAD = "dirtloader.unload";
 	public static final String UNLOAD_OTHER = "dirtloader.unload.other";
 	public static final String TELEPORT = "dirtloader.teleport";
+	public static final String TELEPORT_OTHER = "dirtloader.teleport.other";
 	public static final String BASE = "dirtloader.base";
 }

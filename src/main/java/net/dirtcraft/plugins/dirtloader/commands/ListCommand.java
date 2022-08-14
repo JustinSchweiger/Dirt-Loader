@@ -106,10 +106,17 @@ public class ListCommand {
 			end = player.getChunkLoaders().size();
 		}
 
-		sender.sendMessage(Strings.BAR_TOP);
-		sender.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.GRAY + "'s Chunks:");
-
 		boolean teleportPerm = sender.hasPermission(Permissions.TELEPORT);
+		boolean teleportOtherPerm = sender.hasPermission(Permissions.TELEPORT_OTHER);
+		boolean unloadPerm = sender.hasPermission(Permissions.UNLOAD);
+		boolean unloadOtherPerm = sender.hasPermission(Permissions.UNLOAD_OTHER);
+		boolean senderEqualsPlayer = sender.getName().equals(player.getName());
+
+		sender.sendMessage(Strings.BAR_TOP);
+
+		if (!senderEqualsPlayer) {
+			sender.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.GRAY + "'s Chunks:");
+		}
 
 		for (int i = start; i < end; i++) {
 			BaseComponent[] unloadComponent = new ComponentBuilder("")
@@ -133,29 +140,31 @@ public class ListCommand {
 									ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getChunkLoaders().get(i).getCreationTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) + ChatColor.GRAY + " at " + ChatColor.GOLD + player.getChunkLoaders().get(i).getCreationTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 					))).create();
 
-			BaseComponent[] entry;
-			if (teleportPerm) {
-				entry = new ComponentBuilder("")
-						.append(unloadComponent)
-						.append(ChatColor.GRAY + " - ")
-						.event((HoverEvent) null)
-						.event((ClickEvent) null)
-						.append(teleportComponent)
-						.append(ChatColor.GRAY + " - ")
-						.event((HoverEvent) null)
-						.event((ClickEvent) null)
-						.append(chunkloaderPart)
-						.create();
-			} else {
-				entry = new ComponentBuilder("")
-						.append(unloadComponent)
-						.append(ChatColor.GRAY + " - ")
-						.event((HoverEvent) null)
-						.event((ClickEvent) null)
-						.append(chunkloaderPart)
-						.create();
-			}
+			BaseComponent[] entry = null;
 
+			if ((senderEqualsPlayer && unloadPerm) || unloadOtherPerm) {
+				if (teleportPerm || teleportOtherPerm) {
+					entry = new ComponentBuilder("")
+							.append(unloadComponent)
+							.append(ChatColor.GRAY + " - ")
+							.event((HoverEvent) null)
+							.event((ClickEvent) null)
+							.append(teleportComponent)
+							.append(ChatColor.GRAY + " - ")
+							.event((HoverEvent) null)
+							.event((ClickEvent) null)
+							.append(chunkloaderPart)
+							.create();
+				} else {
+					entry = new ComponentBuilder("")
+							.append(unloadComponent)
+							.append(ChatColor.GRAY + " - ")
+							.event((HoverEvent) null)
+							.event((ClickEvent) null)
+							.append(chunkloaderPart)
+							.create();
+				}
+			}
 
 			sender.spigot().sendMessage(entry);
 		}

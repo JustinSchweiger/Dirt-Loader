@@ -5,10 +5,7 @@ import net.dirtcraft.plugins.dirtloader.data.Chunk;
 import net.dirtcraft.plugins.dirtloader.data.ChunkLoader;
 import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.data.Player;
-import net.dirtcraft.plugins.dirtloader.database.callbacks.ChunksCallback;
-import net.dirtcraft.plugins.dirtloader.database.callbacks.LoadChunkCallback;
-import net.dirtcraft.plugins.dirtloader.database.callbacks.PlayerCallback;
-import net.dirtcraft.plugins.dirtloader.database.callbacks.UnloadChunkCallback;
+import net.dirtcraft.plugins.dirtloader.database.callbacks.*;
 import net.dirtcraft.plugins.dirtloader.utils.Utilities;
 import org.bukkit.Bukkit;
 
@@ -61,7 +58,7 @@ public class DatabaseOperation {
 							UUID.fromString(chunkloaderResult.getString("loader_uuid")),
 							UUID.fromString(chunkloaderResult.getString("player_owneruuid")),
 							new Chunk(
-									chunkloaderResult.getString("loader_world"),
+									chunkloaderResult.getString("loader_world").trim(),
 									chunkloaderResult.getInt("loader_x"),
 									chunkloaderResult.getInt("loader_z")
 							),
@@ -255,7 +252,7 @@ public class DatabaseOperation {
 				}
 
 				Chunk chunk = new Chunk(
-						resultSet.getString("LOADER_WORLD"),
+						resultSet.getString("LOADER_WORLD").trim(),
 						resultSet.getInt("LOADER_X"),
 						resultSet.getInt("LOADER_Z")
 				);
@@ -285,6 +282,41 @@ public class DatabaseOperation {
 				}
 
 				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> unloadChunkCallback.onSuccess(chunkloader));
+			} catch (SQLException e) {
+				if (Utilities.config.general.debug) {
+					Utilities.log(Level.SEVERE, "Could not execute query!");
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	public static void getChunkloader(final UUID chunkloaderUuid, final UUID playerUuid, final boolean hasTeleportOtherPerm, final TeleportCallback teleportCallback) {
+		Bukkit.getScheduler().runTaskAsynchronously(DirtLoader.getPlugin(), () -> {
+			try (Connection connection = Database.getConnection();
+			     PreparedStatement getChunkloader = connection.prepareStatement("SELECT * FROM LOADER WHERE LOADER_UUID = ?")
+			) {
+				getChunkloader.setString(1, chunkloaderUuid.toString());
+				ResultSet resultSet = getChunkloader.executeQuery();
+
+				if (!resultSet.next()) {
+					Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), teleportCallback::onChunkloaderNotFound);
+					return;
+				}
+
+				if (!UUID.fromString(resultSet.getString("PLAYER_OWNERUUID")).equals(playerUuid)) {
+					if (!hasTeleportOtherPerm) {
+						Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), teleportCallback::onNotChunkloaderOwner);
+						return;
+					}
+				}
+
+				Chunk chunk = new Chunk(
+						resultSet.getString("LOADER_WORLD").trim(),
+						resultSet.getInt("LOADER_X"),
+						resultSet.getInt("LOADER_Z")
+				);
+				Bukkit.getScheduler().runTask(DirtLoader.getPlugin(), () -> teleportCallback.onSuccess(chunk));
 			} catch (SQLException e) {
 				if (Utilities.config.general.debug) {
 					Utilities.log(Level.SEVERE, "Could not execute query!");
