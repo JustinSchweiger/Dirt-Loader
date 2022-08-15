@@ -1,10 +1,7 @@
 package net.dirtcraft.plugins.dirtloader.commands;
 
-import net.dirtcraft.plugins.dirtloader.data.ChunkLoader;
-import net.dirtcraft.plugins.dirtloader.data.ChunkManager;
 import net.dirtcraft.plugins.dirtloader.utils.Permissions;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
-import net.dirtcraft.plugins.dirtloader.utils.Utilities;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,16 +30,16 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		}
 
 		String arg = args[0].toLowerCase();
-		/*
-		                      !!!!!!!!!!ACTIVATE FOR OUTPUT OF LOADED CHUNKS VARIABLE AFTER EVERY COMMAND!!!!!!!!!!!!!
+
+		 /*                     //!!!!!!!!!!ACTIVATE FOR OUTPUT OF LOADED CHUNKS VARIABLE AFTER EVERY COMMAND!!!!!!!!!!!!!
 
 		HashMap<UUID, List<ChunkLoader>> chunkloaders = ChunkManager.getLoadedChunks();
 		for (Map.Entry<UUID, List<ChunkLoader>> chunkloader : chunkloaders.entrySet()) {
 			for (ChunkLoader loader : chunkloader.getValue()) {
-				System.out.println("UUID: " + loader.getOwnerUuid() + "\t\t" + loader.getChunk().getX() + " | " + loader.getChunk().getZ());
+				System.out.println("|" + loader.getOwnerUuid() + "|\t\t" + loader.getChunk().getX() + " | " + loader.getChunk().getZ());
 			}
-		}
-		*/
+		}*/
+
 
 		switch (arg) {
 			case "list":
@@ -70,20 +67,21 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 
 	private ArrayList<String> getListings(CommandSender sender) {
 		ArrayList<String> listings = new ArrayList<>();
-		if (sender.hasPermission(Permissions.LIST_OTHER)) {
-			listings.add(Strings.HELP_LIST_USER);
-		}
 
 		if (sender.hasPermission(Permissions.LIST) && !sender.hasPermission(Permissions.LIST_OTHER)) {
 			listings.add(Strings.HELP_LIST);
 		}
 
-		if (sender.hasPermission(Permissions.BAL_OTHER)) {
-			listings.add(Strings.HELP_BAL_USER);
+		if (sender.hasPermission(Permissions.LIST_OTHER)) {
+			listings.add(Strings.HELP_LIST_OTHER);
 		}
 
 		if (sender.hasPermission(Permissions.BAL) && !sender.hasPermission(Permissions.BAL_OTHER)) {
 			listings.add(Strings.HELP_BAL);
+		}
+
+		if (sender.hasPermission(Permissions.BAL_OTHER)) {
+			listings.add(Strings.HELP_BAL_USER);
 		}
 
 		if (sender.hasPermission(Permissions.CHUNKS)) {
@@ -110,7 +108,7 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 		List<String> arguments = new ArrayList<>();
 
 		if (args.length == 1) {
-			if (sender.hasPermission(Permissions.LIST_OTHER)) {
+			if (sender.hasPermission(Permissions.LIST_OTHER) || sender.hasPermission(Permissions.LIST)) {
 				arguments.add("list");
 			}
 

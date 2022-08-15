@@ -30,6 +30,11 @@ public class LoadCommand {
 			return false;
 		}
 
+		if (args[1].equalsIgnoreCase("offline") && !Utilities.config.offlineLoader.enabled) {
+			sender.sendMessage(Strings.OFFLINE_LOADER_DISABLED);
+			return false;
+		}
+
 		String type = args[1].toLowerCase().trim();
 		Player player = (Player) sender;
 		UUID ownerUuid = player.getUniqueId();

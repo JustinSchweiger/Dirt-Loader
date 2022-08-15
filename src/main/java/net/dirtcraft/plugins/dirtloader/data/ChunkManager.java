@@ -2,11 +2,9 @@ package net.dirtcraft.plugins.dirtloader.data;
 
 import net.dirtcraft.plugins.dirtloader.DirtLoader;
 import net.dirtcraft.plugins.dirtloader.database.DatabaseOperation;
-import net.dirtcraft.plugins.dirtloader.database.callbacks.OfflineChunkloaderCallback;
 import net.dirtcraft.plugins.dirtloader.utils.Strings;
 import net.dirtcraft.plugins.dirtloader.utils.Utilities;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.time.LocalDateTime;
@@ -73,7 +71,14 @@ public class ChunkManager {
 	 * Restarts the offline chunkloader purge task.
 	 */
 	public static void restartOfflinePurgeTask() {
-		scheduler.cancelTasks(DirtLoader.getPlugin());
+		if (!Utilities.config.offlineLoader.enabled) {
+			Utilities.log(Level.WARNING, Strings.OFFLINE_LOADER_DISABLED);
+		}
+
+		if (scheduler != null) {
+			scheduler.cancelTasks(DirtLoader.getPlugin());
+		}
+
 		startOfflinePurgeTask();
 	}
 
@@ -140,7 +145,11 @@ public class ChunkManager {
 	 */
 	public static void removeChunk(UUID uuid, ChunkLoader chunkLoader) {
 		if (loadedChunks.containsKey(uuid)) {
-			loadedChunks.get(uuid).remove(chunkLoader);
+			Optional<ChunkLoader> toRemove = loadedChunks.get(uuid)
+					.stream()
+					.filter(loader -> loader.getUuid().equals(chunkLoader.getUuid()))
+					.findFirst();
+			loadedChunks.get(uuid).remove(toRemove.get());
 		}
 
 		unloadChunk(chunkLoader.getChunk());
@@ -151,7 +160,11 @@ public class ChunkManager {
 
 	public static void removeChunkWithoutUnload(UUID uuid, ChunkLoader chunkLoader) {
 		if (loadedChunks.containsKey(uuid)) {
-			loadedChunks.get(uuid).remove(chunkLoader);
+			Optional<ChunkLoader> toRemove = loadedChunks.get(uuid)
+					.stream()
+					.filter(loader -> loader.getUuid().equals(chunkLoader.getUuid()))
+					.findFirst();
+			loadedChunks.get(uuid).remove(toRemove.get());
 		}
 	}
 

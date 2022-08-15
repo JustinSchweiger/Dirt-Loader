@@ -73,7 +73,15 @@ public class ListCommand {
 	}
 
 	private static void showList(final CommandSender sender, final String playerForList, final int page) {
-		DatabaseOperation.getPlayer("player_name", playerForList, new PlayerCallback() {
+		String key;
+
+		if (playerForList.length() <= 16 && playerForList.length() >= 3) {
+			key = "player_name";
+		} else {
+			key = "player_uuid";
+		}
+
+		DatabaseOperation.getPlayer(key, playerForList, new PlayerCallback() {
 			@Override
 			public void onPlayerFound(net.dirtcraft.plugins.dirtloader.data.Player player) {
 				sendListToPlayer(sender, player, page);

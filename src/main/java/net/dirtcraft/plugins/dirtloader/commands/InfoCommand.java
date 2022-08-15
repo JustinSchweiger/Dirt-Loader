@@ -53,7 +53,7 @@ public class InfoCommand {
 			public void onChunkloaderFound(List<ChunkLoader> chunkLoader) {
 				Player player = (Player) sender;
 				sender.sendMessage(Strings.BAR_TOP);
-				sender.sendMessage(Strings.CHUNKLOADERS_FOUND_IN_CHUNK.replace("{X}", Integer.toString(player.getLocation().getChunk().getX())).replace("{Z}", Integer.toString(player.getLocation().getChunk().getZ())));
+				sender.sendMessage(Strings.CHUNKLOADERS_FOUND_IN_CHUNK.replace("{X}", Integer.toString(player.getLocation().getChunk().getX())).replace("{Z}", Integer.toString(player.getLocation().getChunk().getZ())).replace("{amount}", Integer.toString(chunkLoader.size())));
 				for (ChunkLoader loader : chunkLoader) {
 					BaseComponent[] unloadComponent = new ComponentBuilder("")
 							.append(ChatColor.DARK_GRAY + "[" + ChatColor.RED + "\u2715" + ChatColor.DARK_GRAY + "]")
@@ -63,13 +63,15 @@ public class InfoCommand {
 					BaseComponent[] chunkloaderPart = new ComponentBuilder("")
 							.append(ChatColor.GOLD + loader.getType().substring(0, 1).toUpperCase() + loader.getType().substring(1).trim() + " Chunkloader")
 							.event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(
-									ChatColor.GRAY + "Owner" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + player.getName() + "\n" +
+									ChatColor.GRAY + "Owner" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + loader.getOwnerUuid() + "\n" +
 											"\n" +
 											ChatColor.GRAY + "Type" + ChatColor.DARK_GRAY + ": " + ChatColor.AQUA + loader.getType() + "\n" +
 											ChatColor.GRAY + "World" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + loader.getChunk().getWorld() + "\n" +
 											ChatColor.GRAY + "Location" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + "Chunk " + ChatColor.GRAY + "(" + ChatColor.DARK_AQUA + loader.getChunk().getX() + ChatColor.GRAY + " | " + ChatColor.DARK_AQUA + loader.getChunk().getZ() + ChatColor.GRAY + ")\n" +
-											ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + loader.getCreationTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) + ChatColor.GRAY + " at " + ChatColor.GOLD + loader.getCreationTime().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-							))).create();
+											ChatColor.GRAY + "Created" + ChatColor.DARK_GRAY + ": " + ChatColor.GOLD + loader.getCreationTime().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) + ChatColor.GRAY + " at " + ChatColor.GOLD + loader.getCreationTime().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "\n" +
+											"\n" +
+											ChatColor.DARK_AQUA + "                \u2219 " + ChatColor.GREEN + "Click to copy UUID!" + ChatColor.DARK_AQUA + " \u2219")))
+							.event(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, loader.getOwnerUuid().toString())).create();
 
 					BaseComponent[] entry;
 					if (sender.hasPermission(Permissions.UNLOAD_OTHER)) {

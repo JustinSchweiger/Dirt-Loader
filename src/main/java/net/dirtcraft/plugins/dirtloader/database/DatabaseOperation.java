@@ -258,7 +258,7 @@ public class DatabaseOperation {
 						chunkloaderUuid,
 						playerUuid,
 						chunk,
-						resultSet.getString("LOADER_TYPE"),
+						resultSet.getString("LOADER_TYPE").trim(),
 						creationTime,
 						shutdownTime
 				);

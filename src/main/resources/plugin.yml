@@ -24,36 +24,38 @@ permissions:
         children:
             dirtloader.base: true
             dirtloader.list: true
-            dirtloader.list.user: true
+            dirtloader.list.other: true
             dirtloader.bal: true
-            dirtloader.bal.user: true
+            dirtloader.bal.other: true
             dirtloader.load: true
             dirtloader.unload: true
             dirtloader.unload.other: true
             dirtloader.info: true
             dirtloader.teleport: true
+            dirtloader.teleport.other: true
     dirtloader.admin:
         description: Admin permission for players to use DirtLoader
         children:
             dirtloader.base: true
             dirtloader.list: true
-            dirtloader.list.user: true
+            dirtloader.list.other: true
             dirtloader.bal: true
-            dirtloader.bal.user: true
+            dirtloader.bal.other: true
             dirtloader.load: true
             dirtloader.unload: true
             dirtloader.unload.other: true
             dirtloader.info: true
             dirtloader.teleport: true
+            dirtloader.teleport.other: true
             dirtloader.chunks: true
             dirtloader.reload: true
     dirtloader.list:
         description: Permission to list own chunkloaders
-    dirtloader.list.user:
+    dirtloader.list.other:
         description: Permission to list other players chunkloaders
     dirtloader.bal:
         description: Permission to see own chunkloader balance
-    dirtloader.bal.user:
+    dirtloader.bal.other:
         description: Permission to see other players chunkloader balance
     dirtloader.chunks:
         description: Permission to add and remove chunks to and from a player
@@ -69,3 +71,5 @@ permissions:
         description: Permission to unload other players chunks
     dirtloader.teleport:
         description: Permission to use the teleport functionality
+    dirtloader.teleport.other:
+        description: Permission to teleport to other players chunks

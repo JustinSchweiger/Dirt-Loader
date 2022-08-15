@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS loader
     loader_world        CHAR(36)    NOT NULL,
     loader_x            SMALLINT    NOT NULL,
     loader_z            SMALLINT    NOT NULL,
-    loader_creationTime VARCHAR(25) NOT NULL,
-    loader_shutdownTime VARCHAR(25),
+    loader_creationTime VARCHAR(40) NOT NULL,
+    loader_shutdownTime VARCHAR(40),
     primary key (loader_uuid),
     FOREIGN KEY (player_ownerUuid) REFERENCES player (player_uuid) ON DELETE CASCADE
 );
