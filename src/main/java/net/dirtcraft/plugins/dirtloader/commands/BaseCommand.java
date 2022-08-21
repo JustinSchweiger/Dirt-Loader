@@ -21,25 +21,17 @@ public class BaseCommand implements CommandExecutor, TabCompleter {
 
 		if (args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("help"))) {
 			ArrayList<String> listings = getListings(sender);
-			StringBuilder message = new StringBuilder();
+			sender.sendMessage(Strings.BAR_TOP);
+			sender.sendMessage("");
 			for (String listing : listings) {
-				message.append(listing);
+				sender.sendMessage(listing);
 			}
-			sender.sendMessage(Strings.BAR_TOP + message + Strings.BAR_BOTTOM);
+			sender.sendMessage("");
+			sender.sendMessage(Strings.BAR_BOTTOM);
 			return true;
 		}
 
 		String arg = args[0].toLowerCase();
-
-		 /*                     //!!!!!!!!!!ACTIVATE FOR OUTPUT OF LOADED CHUNKS VARIABLE AFTER EVERY COMMAND!!!!!!!!!!!!!
-
-		HashMap<UUID, List<ChunkLoader>> chunkloaders = ChunkManager.getLoadedChunks();
-		for (Map.Entry<UUID, List<ChunkLoader>> chunkloader : chunkloaders.entrySet()) {
-			for (ChunkLoader loader : chunkloader.getValue()) {
-				System.out.println("|" + loader.getOwnerUuid() + "|\t\t" + loader.getChunk().getX() + " | " + loader.getChunk().getZ());
-			}
-		}*/
-
 
 		switch (arg) {
 			case "list":

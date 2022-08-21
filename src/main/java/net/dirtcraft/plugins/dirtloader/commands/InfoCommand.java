@@ -54,6 +54,7 @@ public class InfoCommand {
 				Player player = (Player) sender;
 				sender.sendMessage(Strings.BAR_TOP);
 				sender.sendMessage(Strings.CHUNKLOADERS_FOUND_IN_CHUNK.replace("{X}", Integer.toString(player.getLocation().getChunk().getX())).replace("{Z}", Integer.toString(player.getLocation().getChunk().getZ())).replace("{amount}", Integer.toString(chunkLoader.size())));
+				sender.sendMessage("");
 				for (ChunkLoader loader : chunkLoader) {
 					BaseComponent[] unloadComponent = new ComponentBuilder("")
 							.append(ChatColor.DARK_GRAY + "[" + ChatColor.RED + "\u2715" + ChatColor.DARK_GRAY + "]")
@@ -90,6 +91,7 @@ public class InfoCommand {
 
 					sender.spigot().sendMessage(entry);
 				}
+				sender.sendMessage("");
 				sender.sendMessage(Strings.BAR_BOTTOM);
 			}
 		});

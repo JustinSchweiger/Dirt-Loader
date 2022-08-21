@@ -121,7 +121,7 @@ public class ListCommand {
 		boolean senderEqualsPlayer = sender.getName().equals(player.getName());
 
 		sender.sendMessage(Strings.BAR_TOP);
-
+		sender.sendMessage("");
 		if (!senderEqualsPlayer) {
 			sender.sendMessage(ChatColor.GREEN + player.getName() + ChatColor.GRAY + "'s Chunks:");
 		}
@@ -177,7 +177,8 @@ public class ListCommand {
 			sender.spigot().sendMessage(entry);
 		}
 
-		TextComponent bottomBar = new TextComponent(Strings.HALF_BAR_BOTTOM);
+		sender.sendMessage("");
+		TextComponent bottomBar = new TextComponent(TextComponent.fromLegacyText(Strings.HALF_BAR_ONE));
 		TextComponent pagePrev;
 		if (page == 1) {
 			pagePrev = new TextComponent(ChatColor.BLACK + " \u00AB ");
@@ -194,7 +195,7 @@ public class ListCommand {
 			}
 		}
 		bottomBar.addExtra(pagePrev);
-		bottomBar.addExtra(ChatColor.DARK_AQUA + " " + page + ChatColor.GRAY + "  /  " + ChatColor.DARK_AQUA + maxPages + " ");
+		bottomBar.addExtra(ChatColor.DARK_AQUA + " " + page + ChatColor.GRAY + " / " + ChatColor.DARK_AQUA + maxPages + " ");
 		TextComponent pageNext;
 		if (page == maxPages) {
 			pageNext = new TextComponent(ChatColor.BLACK + " \u00BB ");
@@ -211,7 +212,7 @@ public class ListCommand {
 			}
 		}
 		bottomBar.addExtra(pageNext);
-		bottomBar.addExtra(Strings.HALF_BAR_BOTTOM);
+		bottomBar.addExtra(new TextComponent(TextComponent.fromLegacyText(Strings.HALF_BAR_TWO)));
 		sender.spigot().sendMessage(bottomBar);
 	}
 }
